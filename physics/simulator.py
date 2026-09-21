@@ -1,7 +1,12 @@
 import torch
 import torch.nn as nn
+import sys
+import os
 
-# Import the tools we built in the previous steps
+# Force Python to add the master EUV_phase_retrieval folder to its radar
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import the tools using absolute paths
 from physics.grid import create_spatial_grid, create_circular_mask
 from physics.zernike import get_polar_coordinates, zernike_polynomial
 
