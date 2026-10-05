@@ -11,7 +11,8 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
-from ai.checkpoint import load_model
+from ai.checkpoint import load_models
+from ai.ensemble import Ensemble
 from physics.config import OpticsConfig
 from physics.zernike import noll_to_nm, get_noll_polynomial
 from physics.simulator import OpticalSystem, twin_phase
@@ -78,20 +79,35 @@ def evaluate(
     num_samples: int = 1000,
     seed: int = 1234,
     batch_size: int = 64,
-    out_dir: str = 'eval'
+    out_dir: str = 'eval',
+    noise_mult: float = 1.0
 ):
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Geometry, diversity planes and architecture all come from the checkpoint
-    model, cfg, ckpt = load_model(checkpoint, device)
+    # Geometry, diversity planes and architecture all come from the checkpoint(s).
+    # Several checkpoints form a deep ensemble whose prediction is the member mean.
+    checkpoints = [checkpoint] if isinstance(checkpoint, str) else list(checkpoint)
+    models, cfg, ckpts = load_models(checkpoints, device)
+    model = models[0] if len(models) == 1 else Ensemble(models).eval()
+    ckpt = ckpts[0]
     mode = ckpt["model_kwargs"].get("mode", "hybrid")
-    print(f"Loaded {checkpoint} (mode={mode}, epoch {ckpt['epoch']}, val_loss {ckpt['val_loss']:.4f}) on {device}")
+    for path, ck in zip(checkpoints, ckpts):
+        print(f"Loaded {path} (mode={ck['model_kwargs'].get('mode', 'hybrid')}, epoch {ck['epoch']}, "
+              f"val_loss {ck['val_loss']:.4f}) on {device}")
+    label = os.path.relpath(checkpoints[0]) if len(checkpoints) == 1 else f"ensemble of {len(checkpoints)}"
+    if len(checkpoints) > 1:
+        print(f"Evaluating the {label} (member-mean prediction)")
     print(f"Config: K={cfg.K} planes {cfg.diversity_defocus}, pupil_radius={cfg.pupil_radius}, crop={cfg.crop_size}")
 
     random.seed(seed)
     torch.manual_seed(seed)
     dataset = PhaseRetrievalDataset(cfg, num_samples=num_samples, device=torch.device('cpu'), return_coeffs=True)
+    # Evaluate at one fixed noise level (no training-time augmentation): noise_mult x the nominal level
+    dataset.noise_aug_max = 1.0
+    dataset.noise_std *= noise_mult
+    print(f"Test noise: x{noise_mult:g} nominal (std/peak {cfg.noise_rel * noise_mult:.2e}); "
+          f"model trained with noise_aug_max={cfg.noise_aug_max:g}")
     noll = np.array(dataset.noll_indices)
     is_even = even_mode_mask(noll)
     checks = self_check(dataset, is_even)
@@ -208,7 +224,7 @@ def evaluate(
     for s in ('left', 'bottom'):
         ax.spines[s].set_color(muted)
     ax.tick_params(colors=muted)
-    ax.set_title(f"Per-mode coefficient R² — {os.path.relpath(checkpoint)}, {num_samples} samples",
+    ax.set_title(f"Per-mode coefficient R² — {label}, {num_samples} samples",
                  color=ink, loc='left')
     from matplotlib.patches import Patch
     ax.legend(handles=[
@@ -222,7 +238,7 @@ def evaluate(
     plt.close(fig)
 
     metrics = {
-        "checkpoint": checkpoint, "mode": mode, "config": ckpt["config"], "num_samples": num_samples, "seed": seed,
+        "checkpoint": checkpoints, "mode": mode, "config": ckpt["config"], "noise_mult": noise_mult, "num_samples": num_samples, "seed": seed,
         "self_check": checks,
         "noll": noll.tolist(), "is_even": is_even.tolist(),
         "r2_head": r2_head.tolist(), "r2_proj": r2_proj.tolist(), "r2_twin_aware": r2_twin_aware.tolist(),
@@ -240,10 +256,12 @@ def evaluate(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Per-mode and twin-image evaluation of a phase retrieval checkpoint")
-    parser.add_argument('--checkpoint', type=str, default='saved_models/latest/best.pth')
+    parser.add_argument('--checkpoint', type=str, nargs='+', default=['saved_models/latest/best.pth'],
+                        help="One checkpoint, or several ensemble members (same config)")
     parser.add_argument('--num-samples', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=1234)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--out-dir', type=str, default='eval')
+    parser.add_argument('--noise-mult', type=float, default=1.0, help="Test noise as a multiple of the nominal level")
     args = parser.parse_args()
-    evaluate(args.checkpoint, args.num_samples, args.seed, args.batch_size, args.out_dir)
+    evaluate(args.checkpoint, args.num_samples, args.seed, args.batch_size, args.out_dir, args.noise_mult)

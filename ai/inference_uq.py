@@ -9,18 +9,20 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our custom modules
 from ai.dataset import PhaseRetrievalDataset
-from ai.checkpoint import load_model
+from ai.checkpoint import load_models
 from ai.evaluate import make_coeff_projector
 
-def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
+def run_monte_carlo_inference(model_path, mc_passes: int = 50):
     # 1. Hardware Optimization: Utilize CUDA if available, fallback to MPS/CPU
     device = torch.device('cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu'))
     print(f"Running Monte Carlo Inference on: {device}")
 
-    # 2. Rebuild the trained network from its checkpoint (geometry and diversity planes included).
-    # Raises if the checkpoint is missing or does not match; never runs with random weights
-    model, cfg, _ = load_model(model_path, device)
-    print(f"Loaded trained model weights from {model_path} (K={cfg.K} planes {cfg.diversity_defocus}).")
+    # 2. Rebuild the trained network(s) from checkpoint (geometry and diversity planes included).
+    # Several paths form a deep ensemble. Raises if a checkpoint is missing or does not match;
+    # never runs with random weights
+    paths = [model_path] if isinstance(model_path, str) else list(model_path)
+    models, cfg, _ = load_models(paths, device)
+    print(f"Loaded {len(models)} model(s) from {paths} (K={cfg.K} planes {cfg.diversity_defocus}).")
 
     # 3. Initialize the dataset to generate a single unseen test sample
     test_dataset = PhaseRetrievalDataset(cfg, num_samples=1, device=device, return_coeffs=True)
@@ -30,11 +32,14 @@ def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
     intensity_input = intensity_input.unsqueeze(0).to(device)
     true_phase = true_phase.to(device)
 
-    # 4. Setup Monte Carlo Dropout
-    model.eval()
-    model.enable_mc_dropout()
+    # 4. Setup Monte Carlo Dropout (mc_passes = 0: dropout off, one deterministic pass per member)
+    for model in models:
+        model.eval()
+        if mc_passes > 0:
+            model.enable_mc_dropout()
+    passes = max(mc_passes, 1)
 
-    print(f"Executing {mc_passes} forward passes for Uncertainty Quantification...")
+    print(f"Executing {len(models)} member(s) x {passes} forward pass(es) for Uncertainty Quantification...")
 
     # Reported coefficients are the LSQ projection of the total predicted phase onto the basis:
     # in hybrid mode the residual branch carries real signal that the modal head misses.
@@ -42,10 +47,11 @@ def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
     predictions, coeffs = [], []
 
     with torch.no_grad():
-        for _ in range(mc_passes):
-            pred = model(intensity_input)
-            predictions.append(pred)
-            coeffs.append(project(pred.squeeze(1))[0])
+        for model in models:
+            for _ in range(passes):
+                pred = model(intensity_input)
+                predictions.append(pred)
+                coeffs.append(project(pred.squeeze(1))[0])
 
     # 5. Statistical Aggregation
     predictions_tensor = torch.stack(predictions)
@@ -75,10 +81,17 @@ def print_coefficient_table(r):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Monte Carlo dropout inference on one fresh synthetic sample")
-    parser.add_argument('--checkpoint', type=str, default='saved_models/latest/best.pth')
-    parser.add_argument('--mc-passes', type=int, default=50)
+    parser.add_argument('--checkpoint', type=str, nargs='+', default=['saved_models/latest/best.pth'],
+                        help="One checkpoint, or several ensemble members (same config)")
+    parser.add_argument('--mc-passes', type=int, default=50,
+                        help="MC-dropout passes per member; 0 = dropout off (pure ensemble)")
     parser.add_argument('--out', type=str, default='uq_monte_carlo.png')
+    parser.add_argument('--seed', type=int, default=None, help="Seed for the test sample and dropout masks")
     args = parser.parse_args()
+    if args.seed is not None:
+        import random
+        random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
     r = run_monte_carlo_inference(args.checkpoint, mc_passes=args.mc_passes)
     cfg = r["cfg"]

@@ -13,20 +13,27 @@ from scipy.stats import spearmanr
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
-from ai.checkpoint import load_model
+from ai.checkpoint import load_models
 from ai.evaluate import make_coeff_projector
 
 SIGMA_FLOOR = 1e-6
 
-def mc_collect(model, cfg, dataset, num_samples, mc_passes, batch_size, device, project):
+def mc_collect(models, cfg, dataset, num_samples, mc_passes, batch_size, device, project):
     """
-    MC-dropout predictions on num_samples draws from dataset. Returns per-pupil-pixel and
-    per-coefficient errors of the predictive mean and the predictive std, plus per-sample summaries.
-    The predictive mean is piston-removed (piston is unobservable and the truth is piston-free).
+    Predictive distribution on num_samples draws from dataset: the equal-weight mixture over all
+    ensemble members x MC-dropout passes (mc_passes = 0: dropout off, one deterministic pass per member).
+    Returns per-pupil-pixel and per-coefficient errors of the predictive mean and the predictive std,
+    plus per-sample summaries. The predictive mean is piston-removed (piston is unobservable).
     """
     pupil = (dataset.mask > 0.5).to(device)
-    model.eval()
-    model.enable_mc_dropout()
+    for m in models:
+        m.eval()
+        if mc_passes > 0:
+            m.enable_mc_dropout()
+    draws = [(m, max(mc_passes, 1)) for m in models]
+    total = sum(n for _, n in draws)
+    if total < 2:
+        raise ValueError("Need at least 2 predictive draws (MC passes or ensemble members) for a std")
     out = {k: [] for k in ("e_pix", "s_pix", "e_coef", "s_coef", "rmse_sample", "sigma_sample")}
     with torch.no_grad():
         for start in range(0, num_samples, batch_size):
@@ -38,15 +45,16 @@ def mc_collect(model, cfg, dataset, num_samples, mc_passes, batch_size, device, 
             s1 = torch.zeros_like(truth)
             s2 = torch.zeros_like(truth)
             coeffs = []
-            for _ in range(mc_passes):
-                pred = model(x).squeeze(1)                     # [B, N, N], masked
-                coeffs.append(project(pred))
-                pv = pred[:, pupil]
-                pv = pv - pv.mean(1, keepdim=True)
-                s1 += pv
-                s2 += pv ** 2
-            mean = s1 / mc_passes
-            var = (s2 / mc_passes - mean ** 2).clamp_min(0) * mc_passes / (mc_passes - 1)
+            for model, passes in draws:
+                for _ in range(passes):
+                    pred = model(x).squeeze(1)                     # [B, N, N], masked
+                    coeffs.append(project(pred))
+                    pv = pred[:, pupil]
+                    pv = pv - pv.mean(1, keepdim=True)
+                    s1 += pv
+                    s2 += pv ** 2
+            mean = s1 / total
+            var = (s2 / total - mean ** 2).clamp_min(0) * total / (total - 1)
             coeffs = torch.stack(coeffs)                      # [T, B, M]
 
             e_pix = mean - truth
@@ -84,38 +92,49 @@ def fit_scale(e: np.ndarray, s: np.ndarray) -> float:
     s = np.maximum(s.ravel().astype(np.float64), SIGMA_FLOOR)
     return float(np.sqrt(np.mean((e.ravel() / s) ** 2)))
 
-def make_set(cfg, seed, coeff_scale=1.0, noise_mult=1.0):
+def make_set(cfg, seed, coeff_scale=1.0, noise_mult=None):
+    """
+    noise_mult=None keeps the training noise distribution (including augmentation), which reproduces
+    the training validation set; a number pins every sample to that multiple of the nominal noise.
+    """
     random.seed(seed)
     torch.manual_seed(seed)
     dataset = PhaseRetrievalDataset(cfg, num_samples=1, device=torch.device('cpu'), return_coeffs=True)
     dataset.coeff_scale = coeff_scale
-    dataset.noise_std *= noise_mult
+    if noise_mult is not None:
+        dataset.noise_aug_max = 1.0
+        dataset.noise_std *= noise_mult
     return dataset
 
-def run(checkpoint: str, num_samples: int = 1000, ood_samples: int = 500, mc_passes: int = 30,
+def run(checkpoint, num_samples: int = 1000, ood_samples: int = 500, mc_passes: int = 30,
         batch_size: int = 64, val_seed: int = 12345, val_samples: int = 512, out_dir: str = 'eval'):
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model, cfg, ckpt = load_model(checkpoint, device)
+    checkpoints = [checkpoint] if isinstance(checkpoint, str) else list(checkpoint)
+    models, cfg, ckpts = load_models(checkpoints, device)
+    ckpt = ckpts[0]
     project = make_coeff_projector(cfg, device=device, dtype=torch.float32)
-    print(f"Loaded {checkpoint} (epoch {ckpt['epoch']}, val_loss {ckpt['val_loss']:.4f}); "
-          f"K={cfg.K} planes {cfg.diversity_defocus}; MC dropout T={mc_passes}")
+    for path, ck in zip(checkpoints, ckpts):
+        print(f"Loaded {path} (epoch {ck['epoch']}, val_loss {ck['val_loss']:.4f})")
+    print(f"K={cfg.K} planes {cfg.diversity_defocus}; {len(models)} member(s) x "
+          f"{'MC dropout T=' + str(mc_passes) if mc_passes > 0 else 'deterministic (dropout off)'}")
 
     # Validation set (same seed and stream as training's fixed validation set) is used only to fit the scale
     sets = {
         "val (fit scale)": (make_set(cfg, val_seed), val_samples),
-        "test": (make_set(cfg, 1234), num_samples),
-        "OOD coeffs x1.5": (make_set(cfg, 2001, coeff_scale=1.5), ood_samples),
-        "OOD noise x10": (make_set(cfg, 2002, noise_mult=10.0), ood_samples),
+        "test": (make_set(cfg, 1234, noise_mult=1.0), num_samples),
+        "OOD coeffs x1.5": (make_set(cfg, 2001, coeff_scale=1.5, noise_mult=1.0), ood_samples),
+        "noise x10": (make_set(cfg, 2002, noise_mult=10.0), ood_samples),
+        "noise x100": (make_set(cfg, 2003, noise_mult=100.0), ood_samples),
     }
-    raw = {name: mc_collect(model, cfg, ds, n, mc_passes, batch_size, device, project)
+    raw = {name: mc_collect(models, cfg, ds, n, mc_passes, batch_size, device, project)
            for name, (ds, n) in sets.items()}
 
     val = raw["val (fit scale)"]
     scales = {"pixel": fit_scale(val["e_pix"], val["s_pix"]), "coeff": fit_scale(val["e_coef"], val["s_coef"])}
     print(f"Variance scale fitted on validation: pixel x{scales['pixel']:.2f}, coeff x{scales['coeff']:.2f}\n")
 
-    results = {"checkpoint": checkpoint, "mc_passes": mc_passes, "scales": scales, "sets": {}}
+    results = {"checkpoint": checkpoints, "mc_passes": mc_passes, "scales": scales, "sets": {}}
     header = (f"{'set':>16} {'level':>6} | {'RMSE':>6} {'RMS sigma':>9} | {'cov 1s':>6} {'cov 2s':>6} "
               f"{'z RMS':>6} {'NLL':>7} | scaled: {'cov 1s':>6} {'cov 2s':>6} {'NLL':>7}")
     print(header)
@@ -148,7 +167,7 @@ def run(checkpoint: str, num_samples: int = 1000, ood_samples: int = 500, mc_pas
 
 def plot(results, test_raw, scales, path):
     surface, ink, muted, grid = '#fcfcfb', '#0b0b0b', '#52514e', '#e4e3df'
-    colors = {"test": '#2a78d6', "OOD coeffs x1.5": '#eb6834', "OOD noise x10": '#1baf7a'}
+    colors = {"test": '#2a78d6', "OOD coeffs x1.5": '#eb6834', "noise x10": '#1baf7a', "noise x100": '#eda100'}
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.6), facecolor=surface)
 
     for ax, level, title in ((axes[0], "pixel", "Pixel reliability"), (axes[1], "coeff", "Coefficient reliability")):
@@ -195,9 +214,13 @@ def plot(results, test_raw, scales, path):
             ax.spines[s].set_color(muted)
         ax.tick_params(colors=muted)
         ax.legend(frameon=False, fontsize=7.5, labelcolor=muted, loc='upper left')
-    ckpt = results['checkpoint']
-    run_name = f"{os.path.basename(os.path.dirname(os.path.abspath(ckpt)))}/{os.path.basename(ckpt)}"
-    fig.suptitle(f"MC-dropout calibration — {run_name}, T={results['mc_passes']}",
+    ckpts = results['checkpoint']
+    if len(ckpts) == 1:
+        run_name = f"{os.path.basename(os.path.dirname(os.path.abspath(ckpts[0])))}/{os.path.basename(ckpts[0])}"
+    else:
+        run_name = f"ensemble of {len(ckpts)}"
+    method = f"MC dropout T={results['mc_passes']}" if results['mc_passes'] > 0 else "dropout off"
+    fig.suptitle(f"Uncertainty calibration — {run_name}, {method}",
                  color=ink, x=0.01, ha='left')
     plt.tight_layout()
     plt.savefig(path, dpi=140, facecolor=surface)
@@ -205,10 +228,12 @@ def plot(results, test_raw, scales, path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calibration of MC-dropout uncertainty (in- and out-of-distribution)")
-    parser.add_argument('--checkpoint', type=str, default='saved_models/latest/best.pth')
+    parser.add_argument('--checkpoint', type=str, nargs='+', default=['saved_models/latest/best.pth'],
+                        help="One checkpoint, or several ensemble members (same config)")
     parser.add_argument('--num-samples', type=int, default=1000)
     parser.add_argument('--ood-samples', type=int, default=500)
-    parser.add_argument('--mc-passes', type=int, default=30)
+    parser.add_argument('--mc-passes', type=int, default=30,
+                        help="MC-dropout passes per member; 0 = dropout off (pure ensemble)")
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--out-dir', type=str, default='eval')
     args = parser.parse_args()

@@ -49,3 +49,19 @@ def load_model(path: str, device=torch.device('cpu')):
         raise RuntimeError(f"Checkpoint {path} does not match the rebuilt model:\n{e}") from e
     model.eval()
     return model, cfg, ckpt
+
+def load_models(paths, device=torch.device('cpu')):
+    """
+    Loads one or more checkpoints (ensemble members) that must share one OpticsConfig.
+
+    Returns:
+        (list of models in eval mode, OpticsConfig, list of checkpoint dicts)
+    """
+    if isinstance(paths, str):
+        paths = [paths]
+    loaded = [load_model(p, device) for p in paths]
+    cfg = loaded[0][1]
+    for p, (_, c, _) in zip(paths[1:], loaded[1:]):
+        if c != cfg:
+            raise ValueError(f"Ensemble members must share one config; {p} differs from {paths[0]}:\n{c}\nvs\n{cfg}")
+    return [m for m, _, _ in loaded], cfg, [ck for _, _, ck in loaded]
