@@ -120,7 +120,7 @@ def plot(results, num_phases, path):
             ax.spines[s].set_color(muted)
         ax.tick_params(colors=muted)
     axes[0].set_ylim(-5, 105)
-    axes[0].legend(frameon=False, fontsize=8, labelcolor=muted, loc='center right')
+    axes[0].legend(frameon=False, fontsize=8, labelcolor=muted, loc='lower right')
     fig.suptitle(f"Phase diversity study — {num_phases} random training phases, pixelwise solver",
                  color=ink, x=0.01, ha='left')
     plt.tight_layout()
