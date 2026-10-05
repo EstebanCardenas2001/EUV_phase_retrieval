@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import sys
 import os
 import random
+import math
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from physics.config import OpticsConfig
@@ -104,6 +105,8 @@ class PhaseRetrievalDataset(Dataset):
         self.noise_std = cfg.noise_rel * self.simulator.peak_intensity
         # Multiplies every coefficient bound; > 1 gives out-of-distribution aberrations for UQ tests
         self.coeff_scale = 1.0
+        # Upper bound of the per-sample log-uniform noise multiplier; set to 1.0 for fixed-noise evaluation
+        self.noise_aug_max = cfg.noise_aug_max
 
         # Precompute the grid and Zernike basis on device for fast synthesis
         geo = cfg.build_geometry(device)
@@ -142,8 +145,12 @@ class PhaseRetrievalDataset(Dataset):
     def __getitem__(self, idx):
         phase, coeffs = self.sample_phase()
 
+        noise_std = self.noise_std
+        if self.noise_aug_max > 1.0:
+            noise_std *= math.exp(random.uniform(0.0, math.log(self.noise_aug_max)))
+
         with torch.no_grad():
-            intensity = self.simulator(phase, noise_std=self.noise_std)  # [K, N, N]
+            intensity = self.simulator(phase, noise_std=noise_std)  # [K, N, N]
 
             # 2. High-Dynamic-Range log10 compression + strict [0, 1] Min-Max normalization
             # Applied directly to the cropped intensity planes to preserve faint outer diffraction rings

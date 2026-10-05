@@ -106,10 +106,23 @@ def train_model(
     progress_dir: str = 'training_progress',
     val_samples: int = 512,
     val_seed: int = 12345,
-    r2_every: int = 10
+    r2_every: int = 10,
+    scheduler_name: str = 'cosine',
+    min_lr: float = 1e-6,
+    plateau_patience: int = 10,
+    seed: int = None
 ):
     if cfg is None:
         cfg = OpticsConfig()
+    if seed is not None:
+        # Seeds weight init, the training sample stream and (via the torch RNG) DataLoader worker seeds
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+    train_args = dict(epochs=epochs, batch_size=batch_size, samples_per_epoch=samples_per_epoch,
+                      initial_lr=initial_lr, coeff_weight=coeff_weight, scheduler=scheduler_name,
+                      min_lr=min_lr, plateau_patience=plateau_patience, seed=seed,
+                      val_samples=val_samples, val_seed=val_seed)
     crop_size = cfg.crop_size
     os.makedirs(save_dir, exist_ok=True)
     os.makedirs(progress_dir, exist_ok=True)
@@ -126,10 +139,12 @@ def train_model(
     print(f"Optics: N={cfg.N}, L={cfg.L}, pupil_radius={cfg.pupil_radius} "
           f"(footprint {cfg.pupil_diameter_px} px, Q={cfg.Q:.2f}), noise_rel={cfg.noise_rel:.2e}")
     print(f"Phase diversity: K={cfg.K} planes at defocus {cfg.diversity_defocus} rad RMS")
+    print(f"Noise augmentation: {'off' if cfg.noise_aug_max <= 1 else f'log-uniform x1..x{cfg.noise_aug_max:g}'}")
     print(f"Intensity Crop: {crop_size}x{crop_size} (Preserving outer diffraction rings)")
     print(f"Precision: Pure FP32 (Full IEEE-754 precision, no AMP/FP16)")
     print(f"Architecture Mode: {model_mode} | Coeff Loss: sum over modes x {coeff_weight}")
-    print(f"Initial Learning Rate: {initial_lr:.2e}")
+    print(f"Initial Learning Rate: {initial_lr:.2e} | Scheduler: {scheduler_name} (min LR {min_lr:.1e}"
+          f"{f', patience {plateau_patience}' if scheduler_name == 'plateau' else ''}) | Seed: {seed}")
     print(f"Validation: {val_samples} fixed samples (seed {val_seed}) | per-mode R2 every {r2_every} epochs")
     print(f"Checkpoints: {save_dir}/best.pth (lowest val loss), {save_dir}/final.pth")
     print("=" * 65)
@@ -186,9 +201,17 @@ def train_model(
     print(f"Verified all model parameters are trainable: {trainable_params:,} / {total_params:,} (requires_grad = True).")
     print(f"Modal head parameters: {sum(p.numel() for p in model.zernike_head.parameters()):,} (trainable: True)")
 
-    # 4. Optimizer, Scheduler (stepped on validation loss) and R2 projector in Pure FP32
+    # 4. Optimizer, Scheduler and R2 projector in Pure FP32.
+    # Cosine annealing (default) is independent of the noisy early validation loss, which made the
+    # plateau scheduler halve the LR far too early; plateau is kept with a longer patience and an LR floor.
     optimizer = optim.AdamW(model.parameters(), lr=initial_lr, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=4)
+    if scheduler_name == 'cosine':
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs, eta_min=min_lr)
+    elif scheduler_name == 'plateau':
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5,
+                                                         patience=plateau_patience, min_lr=min_lr)
+    else:
+        raise ValueError(f"Unknown scheduler: {scheduler_name}")
     project = make_coeff_projector(cfg)
     is_even = even_mode_mask(cfg.noll_indices)
 
@@ -253,12 +276,15 @@ def train_model(
             record["val_r2_head"] = r2["r2_head"].tolist()
         history.append(record)
 
-        scheduler.step(val_avg["total"])
+        if scheduler_name == 'plateau':
+            scheduler.step(val_avg["total"])
+        else:
+            scheduler.step()
 
         if val_avg["total"] < best_val:
             best_val = val_avg["total"]
             save_checkpoint(os.path.join(save_dir, 'best.pth'), model, cfg, model_kwargs,
-                            current_epoch, best_val)
+                            current_epoch, best_val, train_args=train_args)
 
         with open(os.path.join(save_dir, 'training_log.json'), 'w') as f:
             json.dump({"noll": list(cfg.noll_indices), "coeff_weight": coeff_weight, "history": history}, f, indent=1)
@@ -312,7 +338,8 @@ def train_model(
             plt.savefig(os.path.join(progress_dir, f'epoch_{current_epoch:03d}.png'), dpi=150, bbox_inches='tight')
             plt.close(fig)
 
-    save_checkpoint(os.path.join(save_dir, 'final.pth'), model, cfg, model_kwargs, epochs, val_avg["total"])
+    save_checkpoint(os.path.join(save_dir, 'final.pth'), model, cfg, model_kwargs, epochs, val_avg["total"],
+                    train_args=train_args)
     print(f"\nPure FP32 training complete. Best validation loss: {best_val:.6f} -> {save_dir}/best.pth")
     return best_val
 
@@ -334,6 +361,12 @@ if __name__ == "__main__":
     parser.add_argument('--val-samples', type=int, default=512, help="Fixed validation set size (default: 512)")
     parser.add_argument('--val-seed', type=int, default=12345, help="Validation set seed")
     parser.add_argument('--r2-every', type=int, default=10, help="Log per-mode validation R2 every N epochs")
+    parser.add_argument('--noise-aug-max', type=float, default=OpticsConfig.noise_aug_max,
+                        help="Per-sample noise multiplier drawn log-uniformly from [1, this]; 1 disables (default)")
+    parser.add_argument('--scheduler', type=str, default='cosine', choices=['cosine', 'plateau'])
+    parser.add_argument('--min-lr', type=float, default=1e-6, help="LR floor (cosine eta_min / plateau min_lr)")
+    parser.add_argument('--plateau-patience', type=int, default=10)
+    parser.add_argument('--seed', type=int, default=None, help="Seed for init and training data (ensemble members)")
 
     args = parser.parse_args()
     train_model(
@@ -343,11 +376,16 @@ if __name__ == "__main__":
         initial_lr=args.lr,
         coeff_weight=args.coeff_weight,
         cfg=OpticsConfig(crop_size=args.crop_size,
-                         diversity_defocus=tuple(float(d) for d in args.diversity.split(','))),
+                         diversity_defocus=tuple(float(d) for d in args.diversity.split(',')),
+                         noise_aug_max=args.noise_aug_max),
         model_mode=args.mode,
         save_dir=args.save_dir,
         progress_dir=args.progress_dir,
         val_samples=args.val_samples,
         val_seed=args.val_seed,
-        r2_every=args.r2_every
+        r2_every=args.r2_every,
+        scheduler_name=args.scheduler,
+        min_lr=args.min_lr,
+        plateau_patience=args.plateau_patience,
+        seed=args.seed
     )

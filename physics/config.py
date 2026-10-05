@@ -31,6 +31,9 @@ class OpticsConfig:
     # Gaussian sensor noise std as a fraction of the unaberrated peak intensity.
     # 1.208e-6 reproduces the previous absolute noise_std=0.02 at pupil_radius=0.004 (peak 16553).
     noise_rel: float = 1.208e-6
+    # Training-time noise augmentation: each sample's noise std is noise_rel x a log-uniform factor
+    # in [1, noise_aug_max]. 1.0 disables it (fixed SNR, the behaviour of pre-augmentation checkpoints).
+    noise_aug_max: float = 1.0
     # Extra Noll-4 defocus per measured plane [rad RMS]. K = 3 at +-1.0 resolves the twin ambiguity:
     # the pixelwise solver recovers 96/96 random training phases (ai/diversity_study.py).
     diversity_defocus: tuple = (-1.0, 0.0, 1.0)
@@ -40,6 +43,8 @@ class OpticsConfig:
         object.__setattr__(self, 'noll_indices', tuple(int(j) for j in self.noll_indices))
         object.__setattr__(self, 'diversity_defocus', tuple(float(d) for d in self.diversity_defocus))
 
+        if self.noise_aug_max < 1.0:
+            raise ValueError(f"noise_aug_max must be >= 1, got {self.noise_aug_max}")
         if self.K < 1:
             raise ValueError("diversity_defocus needs at least one plane")
         if self.N % 2 != 0:
