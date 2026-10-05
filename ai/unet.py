@@ -4,8 +4,7 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from physics.grid import create_spatial_grid, create_circular_mask
-from physics.zernike import get_polar_coordinates, compute_zernike_basis
+from physics.config import OpticsConfig
 
 class DifferentiableZernikeGenerator(nn.Module):
     """
@@ -16,7 +15,7 @@ class DifferentiableZernikeGenerator(nn.Module):
     def __init__(self, basis_tensor: torch.Tensor):
         super().__init__()
         # Register basis tensor: [M, H, W]
-        self.register_buffer('basis', basis_tensor)
+        self.register_buffer('basis', basis_tensor, persistent=False)
 
     def forward(self, coeffs: torch.Tensor) -> torch.Tensor:
         """
@@ -97,13 +96,10 @@ class AttentionGate(nn.Module):
 class AttentionResUNet(nn.Module):
     def __init__(
         self,
+        cfg: OpticsConfig,
         in_channels: int = 1,
         out_channels: int = 1,
         features: list = None,
-        noll_indices: tuple = tuple(range(4, 23)),
-        N: int = 256,
-        L: float = 0.01,
-        pupil_radius: float = 0.004,
         mode: str = 'hybrid',
         negative_slope: float = 0.1
     ):
@@ -119,27 +115,25 @@ class AttentionResUNet(nn.Module):
         6. Monte Carlo Dropout support for Uncertainty Quantification.
         
         Args:
+            cfg: Shared optics config. Output size is cfg.N; the input is cfg.crop_size.
             mode: 'hybrid' (modal + residual U-Net), 'modal' (pure modal), or 'unet' (pure spatial).
         """
         super().__init__()
         if features is None:
             features = [64, 128, 256]
-            
+
         self.features = features
         self.mode = mode
+        N = cfg.N
         self.N = N
-        self.noll_indices = tuple(noll_indices)
+        self.noll_indices = cfg.noll_indices
         self.num_zernike = len(self.noll_indices)
-        
-        # 1. Precompute and register circular aperture mask and Zernike basis (256x256)
-        X, Y = create_spatial_grid(N, L)
-        R = torch.sqrt(X**2 + Y**2)
-        mask = create_circular_mask(R, pupil_radius)
-        rho, theta = get_polar_coordinates(X, Y, pupil_radius)
-        basis = compute_zernike_basis(rho, theta, mask, self.noll_indices)
-        
-        self.register_buffer('mask', mask.unsqueeze(0).unsqueeze(0)) # [1, 1, 256, 256]
-        self.zernike_generator = DifferentiableZernikeGenerator(basis)
+
+        # 1. Precompute circular aperture mask and Zernike basis (N x N) from the config.
+        # Non-persistent: geometry always comes from the config, never from a checkpoint.
+        geo = cfg.build_geometry()
+        self.register_buffer('mask', geo.mask.unsqueeze(0).unsqueeze(0), persistent=False) # [1, 1, N, N]
+        self.zernike_generator = DifferentiableZernikeGenerator(geo.basis)
 
         # 2. Residual Encoder Backbone (receives cropped intensity, e.g. 128x128)
         self.encoder = nn.ModuleList()
@@ -278,10 +272,11 @@ UNet = AttentionResUNet
 
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = AttentionResUNet(in_channels=1, out_channels=1).to(device)
-    
-    # 128x128 input tensor preserving outer diffraction rings
-    dummy_intensity = torch.randn(4, 1, 128, 128, device=device)
+    cfg = OpticsConfig()
+    model = AttentionResUNet(cfg, in_channels=1, out_channels=1).to(device)
+
+    # Cropped intensity input preserving outer diffraction rings
+    dummy_intensity = torch.randn(4, 1, cfg.crop_size, cfg.crop_size, device=device)
     pred_phase, pred_coeffs, modal_phase, residual_phase = model(dummy_intensity, return_components=True)
     
     print("Attention Res-UNet initialized successfully!")

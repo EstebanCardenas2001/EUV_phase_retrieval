@@ -5,9 +5,8 @@ import os
 import random
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from physics.config import OpticsConfig
 from physics.simulator import OpticalSystem
-from physics.grid import create_spatial_grid
-from physics.zernike import get_polar_coordinates, compute_zernike_basis
 
 def preprocess_intensity(
     intensity: torch.Tensor,
@@ -70,50 +69,41 @@ def preprocess_intensity(
 class PhaseRetrievalDataset(Dataset):
     def __init__(
         self,
+        cfg: OpticsConfig,
         num_samples: int = 10000,
-        N: int = 256,
-        L: float = 0.01,
-        pupil_radius: float = 0.004,
         device=torch.device('cpu'),
-        noll_indices=tuple(range(4, 23)),
-        return_coeffs: bool = True,
-        crop_size: int = 128
+        return_coeffs: bool = True
     ):
         """
         EUV Phase Retrieval Synthetic Dataset.
-        
+
         Args:
+            cfg: Shared optics config (geometry, Zernike modes, crop size, noise level).
             num_samples: Number of phase/intensity pairs per epoch.
-            N: Grid dimension (256x256).
-            L: Physical grid length in meters.
-            pupil_radius: Pupil aperture radius in meters.
             device: Compute device.
-            noll_indices: Primary Zernike modes to synthesize (Noll 4 to 22).
             return_coeffs: If True, returns target Zernike coefficient vector.
-            crop_size: Center crop dimension for intensity input (128x128 preserves faint outer rings).
         """
+        self.cfg = cfg
         self.num_samples = num_samples
-        self.N = N
-        self.L = L
-        self.pupil_radius = pupil_radius
         self.device = device
-        self.noll_indices = tuple(noll_indices)
+        self.noll_indices = cfg.noll_indices
         self.return_coeffs = return_coeffs
-        self.crop_size = crop_size
-        
-        self.simulator = OpticalSystem(N, L, pupil_radius, device=device)
-        
-        X, Y = create_spatial_grid(N, L, device=device)
-        self.rho, self.theta = get_polar_coordinates(X, Y, pupil_radius)
+        self.crop_size = cfg.crop_size
+
+        self.simulator = OpticalSystem(cfg, device=device)
+        self.noise_std = cfg.noise_rel * self.simulator.peak_intensity
+
+        # Precompute the grid and Zernike basis on device for fast synthesis
+        geo = cfg.build_geometry(device)
+        self.rho, self.theta = geo.rho, geo.theta
         self.mask = self.simulator.mask
-        
-        # Precompute the Zernike basis on device for fast synthesis
-        self.basis = compute_zernike_basis(self.rho, self.theta, self.mask, self.noll_indices).to(device)
-        
+        self.basis = geo.basis
+
     def __len__(self):
         return self.num_samples
-        
-    def __getitem__(self, idx):
+
+    def sample_phase(self):
+        """Draws random Zernike coefficients from the training distribution; returns (phase [N, N], coeffs [M])."""
         num_modes = len(self.noll_indices)
         coeffs = torch.zeros(num_modes, dtype=torch.float32, device=self.basis.device)
         
@@ -133,9 +123,13 @@ class PhaseRetrievalDataset(Dataset):
         pupil_idx = self.mask > 0.5
         piston = phase[pupil_idx].mean()
         phase = (phase - piston) * self.mask
-        
+        return phase, coeffs
+
+    def __getitem__(self, idx):
+        phase, coeffs = self.sample_phase()
+
         with torch.no_grad():
-            intensity = self.simulator(phase, noise_std=0.02)
+            intensity = self.simulator(phase, noise_std=self.noise_std)
             
             # 2. High-Dynamic-Range log10 compression + strict [0, 1] Min-Max normalization
             # Applied directly to 128x128 cropped intensity to preserve faint outer diffraction rings

@@ -12,6 +12,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
 from ai.unet import UNet
+from physics.config import OpticsConfig
 from physics.zernike import noll_to_nm, get_noll_polynomial
 
 def twin_phase(phase: torch.Tensor) -> torch.Tensor:
@@ -71,14 +72,15 @@ def evaluate(
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    model = UNet(in_channels=1, out_channels=1, mode=mode).to(device)
+    cfg = OpticsConfig()
+    model = UNet(cfg, in_channels=1, out_channels=1, mode=mode).to(device)
     load_checkpoint_strict(model, checkpoint, device)
     model.eval()
     print(f"Loaded {checkpoint} (mode={mode}) on {device}")
 
     random.seed(seed)
     torch.manual_seed(seed)
-    dataset = PhaseRetrievalDataset(num_samples=num_samples, device=torch.device('cpu'), return_coeffs=True)
+    dataset = PhaseRetrievalDataset(cfg, num_samples=num_samples, device=torch.device('cpu'), return_coeffs=True)
     noll = np.array(dataset.noll_indices)
     is_even = np.array([abs(noll_to_nm(int(j))[1]) % 2 == 0 for j in noll])
     checks = self_check(dataset, is_even)

@@ -10,23 +10,24 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
 from ai.unet import UNet
 from ai.evaluate import load_checkpoint_strict
+from physics.config import OpticsConfig
 
-def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
+def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int = 50):
     # 1. Hardware Optimization: Utilize CUDA if available, fallback to MPS/CPU
     device = torch.device('cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu'))
     print(f"Running Monte Carlo Inference on: {device}")
 
     # 2. Initialize the dataset to generate a single unseen test sample
-    test_dataset = PhaseRetrievalDataset(num_samples=1, device=device, return_coeffs=True)
+    test_dataset = PhaseRetrievalDataset(cfg, num_samples=1, device=device, return_coeffs=True)
     sample = test_dataset[0]
     intensity_input, true_phase = sample[0], sample[1]
     
-    # Add the batch dimension [1, 1, 256, 256] expected by the network
+    # Add the batch dimension [1, 1, crop, crop] expected by the network
     intensity_input = intensity_input.unsqueeze(0).to(device)
     true_phase = true_phase.to(device)
 
     # 3. Load the trained network
-    model = UNet(in_channels=1, out_channels=1).to(device)
+    model = UNet(cfg, in_channels=1, out_channels=1).to(device)
 
     # Raises if the checkpoint is missing or does not match; never runs with random weights
     load_checkpoint_strict(model, model_path, device)
@@ -54,9 +55,10 @@ def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
 
 if __name__ == "__main__":
     model_path = 'saved_models/unet_phase_retrieval_best.pth'
+    cfg = OpticsConfig()
     
     # Unpack the 5 variables, including the mask
-    intensity, truth, mean_pred, uncertainty, mask = run_monte_carlo_inference(model_path, mc_passes=50)
+    intensity, truth, mean_pred, uncertainty, mask = run_monte_carlo_inference(model_path, cfg, mc_passes=50)
     
     # Move tensors to CPU and convert to NumPy for Matplotlib
     intensity = intensity.cpu().numpy()
@@ -76,15 +78,15 @@ if __name__ == "__main__":
     axes[0].set_title("Input: Sensor Intensity")
     axes[0].axis('off')
     
-    c2 = axes[1].imshow(truth, cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005], vmin=-2.0, vmax=2.0)
+    c2 = axes[1].imshow(truth, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
     axes[1].set_title("Target: True Phase Map")
     fig.colorbar(c2, ax=axes[1], fraction=0.046, pad=0.04)
     
-    c3 = axes[2].imshow(mean_pred, cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005], vmin=-2.0, vmax=2.0)
+    c3 = axes[2].imshow(mean_pred, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
     axes[2].set_title("Output: Predicted Phase (Mean)")
     fig.colorbar(c3, ax=axes[2], fraction=0.046, pad=0.04)
     
-    c4 = axes[3].imshow(uncertainty, cmap='magma', extent=[-0.005, 0.005, -0.005, 0.005])
+    c4 = axes[3].imshow(uncertainty, cmap='magma', extent=cfg.extent)
     axes[3].set_title("UQ: Predictive Variance")
     fig.colorbar(c4, ax=axes[3], fraction=0.046, pad=0.04)
     

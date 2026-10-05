@@ -11,6 +11,7 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
 from ai.unet import UNet
+from physics.config import OpticsConfig
 
 def masked_mse_loss(pred: torch.Tensor, target: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
@@ -30,11 +31,16 @@ def train_model(
     samples_per_epoch: int = 2048,
     initial_lr: float = 3e-4,
     coeff_weight: float = 1.0,
-    crop_size: int = 128,
-    model_mode: str = 'hybrid'
+    cfg: OpticsConfig = None,
+    model_mode: str = 'hybrid',
+    save_dir: str = 'saved_models',
+    progress_dir: str = 'training_progress'
 ):
-    os.makedirs('saved_models', exist_ok=True)
-    os.makedirs('training_progress', exist_ok=True)
+    if cfg is None:
+        cfg = OpticsConfig()
+    crop_size = cfg.crop_size
+    os.makedirs(save_dir, exist_ok=True)
+    os.makedirs(progress_dir, exist_ok=True)
 
     use_cuda = torch.cuda.is_available()
     device = torch.device('cuda' if use_cuda else 'cpu')
@@ -45,6 +51,8 @@ def train_model(
         print(f"Device Name: {torch.cuda.get_device_name(0)}")
         print(f"VRAM Available: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
     print(f"Total Epochs: {epochs} | Batch Size: {batch_size} | Samples/Epoch: {samples_per_epoch}")
+    print(f"Optics: N={cfg.N}, L={cfg.L}, pupil_radius={cfg.pupil_radius} "
+          f"(footprint {cfg.pupil_diameter_px} px, Q={cfg.Q:.2f}), noise_rel={cfg.noise_rel:.2e}")
     print(f"Intensity Crop: {crop_size}x{crop_size} (Preserving outer diffraction rings)")
     print(f"Precision: Pure FP32 (Full IEEE-754 precision, no AMP/FP16)")
     print(f"Architecture Mode: {model_mode} | Coeff Loss Weight: {coeff_weight}")
@@ -53,10 +61,10 @@ def train_model(
 
     # 1. Dataset & Static Validation Sample
     train_dataset = PhaseRetrievalDataset(
+        cfg,
         num_samples=samples_per_epoch,
         device=torch.device('cpu'),
-        return_coeffs=True,
-        crop_size=crop_size
+        return_coeffs=True
     )
 
     print("Generating static validation anchor...")
@@ -84,7 +92,7 @@ def train_model(
     )
 
     # 3. Initialize Model and Verify ALL Parameters are Unfrozen (requires_grad = True)
-    model = UNet(in_channels=1, out_channels=1, mode=model_mode, negative_slope=0.1).to(device)
+    model = UNet(cfg, in_channels=1, out_channels=1, mode=model_mode, negative_slope=0.1).to(device)
     
     # Ensure every single layer has requires_grad = True
     for name, param in model.named_parameters():
@@ -170,7 +178,7 @@ def train_model(
 
         if avg_loss < best_loss:
             best_loss = avg_loss
-            torch.save(model.state_dict(), 'saved_models/unet_phase_retrieval_best.pth')
+            torch.save(model.state_dict(), os.path.join(save_dir, 'unet_phase_retrieval_best.pth'))
 
         # 6. Visual Epoch Tracking: 5-panel diagnostic figure
         if epochs <= 10 or current_epoch % 10 == 0 or current_epoch == 1:
@@ -195,29 +203,29 @@ def train_model(
             axes[0].set_title(f"Input Sensor ({crop_size}x{crop_size})", fontsize=11)
             axes[0].axis('off')
 
-            c2 = axes[1].imshow(np_truth, cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005], vmin=-2.0, vmax=2.0)
+            c2 = axes[1].imshow(np_truth, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
             axes[1].set_title("Target True Phase", fontsize=11)
             fig.colorbar(c2, ax=axes[1], fraction=0.046, pad=0.04)
 
-            c3 = axes[2].imshow(modal_np, cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005], vmin=-2.0, vmax=2.0)
+            c3 = axes[2].imshow(modal_np, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
             axes[2].set_title(f"Modal Baseline (Ep {current_epoch})", fontsize=11)
             fig.colorbar(c3, ax=axes[2], fraction=0.046, pad=0.04)
 
-            c4 = axes[3].imshow(pred_np, cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005], vmin=-2.0, vmax=2.0)
+            c4 = axes[3].imshow(pred_np, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
             axes[3].set_title(f"Total Prediction (Ep {current_epoch})", fontsize=11)
             fig.colorbar(c4, ax=axes[3], fraction=0.046, pad=0.04)
 
             err_map = np.abs(pred_np - np_truth) * static_mask
             err_map = np.nan_to_num(err_map, nan=0.0, posinf=0.0, neginf=0.0)
-            c5 = axes[4].imshow(err_map, cmap='magma', extent=[-0.005, 0.005, -0.005, 0.005], vmin=0.0, vmax=4.0)
+            c5 = axes[4].imshow(err_map, cmap='magma', extent=cfg.extent, vmin=0.0, vmax=4.0)
             axes[4].set_title(f"Abs Error Map (Ep {current_epoch})", fontsize=11)
             fig.colorbar(c5, ax=axes[4], fraction=0.046, pad=0.04)
 
             plt.tight_layout()
-            plt.savefig(f'training_progress/epoch_{current_epoch:03d}.png', dpi=150, bbox_inches='tight')
+            plt.savefig(os.path.join(progress_dir, f'epoch_{current_epoch:03d}.png'), dpi=150, bbox_inches='tight')
             plt.close(fig)
 
-    torch.save(model.state_dict(), 'saved_models/unet_phase_retrieval_final.pth')
+    torch.save(model.state_dict(), os.path.join(save_dir, 'unet_phase_retrieval_final.pth'))
     print(f"\nPure FP32 training complete. Best model saved with loss: {best_loss:.6f}")
     return best_loss
 
@@ -226,7 +234,10 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=150, help="Total epochs (default: 150)")
     parser.add_argument('--batch-size', type=int, default=32, help="Batch size for T4 in pure FP32 (default: 32)")
     parser.add_argument('--samples-per-epoch', type=int, default=2048, help="Samples per epoch (default: 2048)")
-    parser.add_argument('--crop-size', type=int, default=128, help="Crop size for intensity (default: 128)")
+    parser.add_argument('--crop-size', type=int, default=OpticsConfig.crop_size,
+                        help=f"Crop size for intensity (default: {OpticsConfig.crop_size})")
+    parser.add_argument('--save-dir', type=str, default='saved_models', help="Checkpoint output directory")
+    parser.add_argument('--progress-dir', type=str, default='training_progress', help="Diagnostic figure directory")
     parser.add_argument('--lr', type=float, default=3e-4, help="Initial learning rate (default: 3e-4)")
     parser.add_argument('--coeff-weight', type=float, default=1.0, help="Weight for auxiliary Zernike coefficient loss")
     parser.add_argument('--mode', type=str, default='hybrid', choices=['hybrid', 'modal', 'unet'], help="Architecture mode")
@@ -238,7 +249,9 @@ if __name__ == "__main__":
         samples_per_epoch=args.samples_per_epoch,
         initial_lr=args.lr,
         coeff_weight=args.coeff_weight,
-        crop_size=args.crop_size,
-        model_mode=args.mode
+        cfg=OpticsConfig(crop_size=args.crop_size),
+        model_mode=args.mode,
+        save_dir=args.save_dir,
+        progress_dir=args.progress_dir
     )
 

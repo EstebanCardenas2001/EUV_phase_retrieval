@@ -10,9 +10,9 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from physics.config import OpticsConfig
 from physics.simulator import OpticalSystem
-from physics.grid import create_spatial_grid
-from physics.zernike import get_polar_coordinates, zernike_polynomial
+from physics.zernike import zernike_polynomial
 
 def total_variation_loss(img: torch.Tensor):
     """
@@ -24,20 +24,21 @@ def total_variation_loss(img: torch.Tensor):
     tv_w = torch.mean(torch.abs(img[:, 1:] - img[:, :-1]))
     return tv_h + tv_w
 
-def run_inverse_solver():
+def run_inverse_solver(cfg: OpticsConfig = None):
+    if cfg is None:
+        cfg = OpticsConfig()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Running on: {device}")
 
     # 1. Initialize the Physics Engine
-    simulator = OpticalSystem(N=256, L=0.01, pupil_radius=0.004, device=device)
+    simulator = OpticalSystem(cfg, device=device)
 
     # 2. Generate the "Ground Truth" (The hidden reality we want to discover)
-    X, Y = create_spatial_grid(256, 0.01, device=device)
-    rho, theta = get_polar_coordinates(X, Y, 0.004)
-    
+    geo = cfg.build_geometry(device)
+
     # Let's hide a complex combination of aberrations
-    true_phase = (zernike_polynomial(rho, theta, simulator.mask, 'astigmatism_vertical') * 2.0 + 
-                  zernike_polynomial(rho, theta, simulator.mask, 'coma_horizontal') * -1.5)
+    true_phase = (zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'astigmatism_vertical') * 2.0 +
+                  zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'coma_horizontal') * -1.5)
     
     # Run it through the simulator to get the sensor measurement. We detach it from 
     # the computation graph because it is our fixed target, not a variable.
@@ -46,7 +47,7 @@ def run_inverse_solver():
     # 3. Initialize the Optimizer's Guess
     # We start with a completely flat, un-aberrated wavefront (all zeros).
     # requires_grad=True is the magic that tells PyTorch to calculate derivatives for this tensor.
-    predicted_phase = torch.zeros((256, 256), requires_grad=True, device=device)
+    predicted_phase = torch.zeros((cfg.N, cfg.N), requires_grad=True, device=device)
 
     # We use the Adam optimizer. A learning rate of 0.1 is aggressive but works well for phase retrieval.
     optimizer = optim.Adam([predicted_phase], lr=0.1)
@@ -91,12 +92,13 @@ def run_inverse_solver():
     return true_phase, target_intensity, predicted_phase.detach(), loss_history
 
 if __name__ == "__main__":
-    true_phase, target_intensity, recovered_phase, loss_history = run_inverse_solver()
+    cfg = OpticsConfig()
+    true_phase, target_intensity, recovered_phase, loss_history = run_inverse_solver(cfg)
 
     # 5. Visualize the Results
     fig, axes = plt.subplots(1, 4, figsize=(20, 4))
 
-    c1 = axes[0].imshow(true_phase.cpu().numpy(), cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005])
+    c1 = axes[0].imshow(true_phase.cpu().numpy(), cmap='RdBu', extent=cfg.extent)
     axes[0].set_title("Ground Truth Phase (Hidden)")
     fig.colorbar(c1, ax=axes[0])
 
@@ -104,7 +106,7 @@ if __name__ == "__main__":
     axes[1].set_title("Sensor Target (Measured)")
     axes[1].axis('off')
 
-    c3 = axes[2].imshow(recovered_phase.cpu().numpy(), cmap='RdBu', extent=[-0.005, 0.005, -0.005, 0.005])
+    c3 = axes[2].imshow(recovered_phase.cpu().numpy(), cmap='RdBu', extent=cfg.extent)
     axes[2].set_title("Recovered Phase (Solver Output)")
     fig.colorbar(c3, ax=axes[2])
 

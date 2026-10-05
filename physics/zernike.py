@@ -130,14 +130,11 @@ def compute_zernike_basis(rho: torch.Tensor, theta: torch.Tensor, mask: torch.Te
     return torch.stack([get_noll_polynomial(int(j), rho, theta, mask) for j in noll_indices], dim=0)
 
 if __name__ == "__main__":
-    from grid import create_spatial_grid, create_circular_mask
-    N_pixels = 256
-    L_meters = 0.01  
-    pupil_radius = 0.004  
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from physics.config import OpticsConfig
+    cfg = OpticsConfig()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    X, Y = create_spatial_grid(N=N_pixels, L=L_meters, device=device)
-    R = torch.sqrt(X**2 + Y**2)
-    mask = create_circular_mask(R, pupil_radius)
-    rho, theta = get_polar_coordinates(X, Y, pupil_radius)
-    basis = compute_zernike_basis(rho, theta, mask, range(4, 23))
+    basis = cfg.build_geometry(device).basis
     print(f"Zernike basis precomputed: {basis.shape} on {device}")
