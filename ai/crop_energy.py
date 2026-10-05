@@ -39,10 +39,13 @@ def analyze(cfg: OpticsConfig, num_samples: int = 2000, seed: int = 0, batch_siz
             phases = torch.stack([dataset.sample_phase()[0] for _ in range(n)]).to(device)
             # Noise-free intensity: the crop decision is about where the signal energy lives
             intensity = simulator(phases)
-            fracs.append(crop_energy_fractions(intensity).cpu())
+            # Worst diversity plane per sample: every plane must fit in the crop
+            fracs.append(crop_energy_fractions(intensity).amin(dim=1).cpu())
             rms.append(phases[:, pupil].pow(2).mean(1).sqrt().cpu())
-            gx = (phases[:, :, 1:] - phases[:, :, :-1]).abs()[:, inner_x].amax(1)
-            gy = (phases[:, 1:, :] - phases[:, :-1, :]).abs()[:, inner_y].amax(1)
+            # Phase seen by each plane includes its diversity defocus: [n, K, N, N] -> worst plane
+            total = phases.unsqueeze(1) + simulator.diversity_phases
+            gx = (total[..., :, 1:] - total[..., :, :-1]).abs()[..., inner_x].amax(-1).amax(-1)
+            gy = (total[..., 1:, :] - total[..., :-1, :]).abs()[..., inner_y].amax(-1).amax(-1)
             max_grad.append(torch.maximum(gx, gy).cpu())
 
     fracs = torch.cat(fracs).numpy()
@@ -54,7 +57,7 @@ def analyze(cfg: OpticsConfig, num_samples: int = 2000, seed: int = 0, batch_siz
     print(f"Phase RMS in pupil [rad]: median {np.median(rms):.2f}, 95th pct {np.quantile(rms, 0.95):.2f}, max {rms.max():.2f}")
     print(f"Max phase step between adjacent pupil pixels [rad]: median {np.median(max_grad):.3f}, "
           f"max {max_grad.max():.3f} (pupil-plane Nyquist limit: pi = 3.142)")
-    print(f"\nEnergy fraction inside centered crop (noise-free intensity)")
+    print(f"\nEnergy fraction inside centered crop (noise-free intensity, worst of {cfg.K} plane(s))")
     print(f"{'crop':>5} | {'all: mean':>9} {'p1':>7} {'min':>7} | {'top-5% RMS: mean':>16} {'min':>7}")
     for k, c in enumerate(CROPS):
         f, fs = fracs[:, k], fracs[strong, k]
@@ -69,5 +72,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fraction of diffraction energy captured by the intensity crop")
     parser.add_argument('--num-samples', type=int, default=2000)
     parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--diversity', type=str, default=None,
+                        help="Comma-separated diversity defocus per plane (default: OpticsConfig)")
     args = parser.parse_args()
-    analyze(OpticsConfig(), num_samples=args.num_samples, seed=args.seed)
+    cfg = OpticsConfig() if args.diversity is None else \
+        OpticsConfig(diversity_defocus=tuple(float(d) for d in args.diversity.split(',')))
+    analyze(cfg, num_samples=args.num_samples, seed=args.seed)

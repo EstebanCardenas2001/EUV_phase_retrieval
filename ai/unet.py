@@ -97,7 +97,7 @@ class AttentionResUNet(nn.Module):
     def __init__(
         self,
         cfg: OpticsConfig,
-        in_channels: int = 1,
+        in_channels: int = None,
         out_channels: int = 1,
         features: list = None,
         mode: str = 'hybrid',
@@ -116,11 +116,14 @@ class AttentionResUNet(nn.Module):
         
         Args:
             cfg: Shared optics config. Output size is cfg.N; the input is cfg.crop_size.
+            in_channels: Defaults to cfg.K, one channel per phase-diversity plane.
             mode: 'hybrid' (modal + residual U-Net), 'modal' (pure modal), or 'unet' (pure spatial).
         """
         super().__init__()
         if features is None:
             features = [64, 128, 256]
+        if in_channels is None:
+            in_channels = cfg.K
 
         self.features = features
         self.mode = mode
@@ -273,10 +276,10 @@ UNet = AttentionResUNet
 if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     cfg = OpticsConfig()
-    model = AttentionResUNet(cfg, in_channels=1, out_channels=1).to(device)
+    model = AttentionResUNet(cfg, out_channels=1).to(device)
 
     # Cropped intensity input preserving outer diffraction rings
-    dummy_intensity = torch.randn(4, 1, cfg.crop_size, cfg.crop_size, device=device)
+    dummy_intensity = torch.randn(4, cfg.K, cfg.crop_size, cfg.crop_size, device=device)
     pred_phase, pred_coeffs, modal_phase, residual_phase = model(dummy_intensity, return_components=True)
     
     print("Attention Res-UNet initialized successfully!")

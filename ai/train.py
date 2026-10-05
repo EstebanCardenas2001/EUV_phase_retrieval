@@ -53,6 +53,7 @@ def train_model(
     print(f"Total Epochs: {epochs} | Batch Size: {batch_size} | Samples/Epoch: {samples_per_epoch}")
     print(f"Optics: N={cfg.N}, L={cfg.L}, pupil_radius={cfg.pupil_radius} "
           f"(footprint {cfg.pupil_diameter_px} px, Q={cfg.Q:.2f}), noise_rel={cfg.noise_rel:.2e}")
+    print(f"Phase diversity: K={cfg.K} planes at defocus {cfg.diversity_defocus} rad RMS")
     print(f"Intensity Crop: {crop_size}x{crop_size} (Preserving outer diffraction rings)")
     print(f"Precision: Pure FP32 (Full IEEE-754 precision, no AMP/FP16)")
     print(f"Architecture Mode: {model_mode} | Coeff Loss Weight: {coeff_weight}")
@@ -74,7 +75,7 @@ def train_model(
     
     # Crucial: .copy() prevents memory corruption from PyTorch DataLoader multiprocessing shared memory
     static_mask = train_dataset.mask.cpu().numpy().copy()
-    np_intensity = static_intensity.squeeze().cpu().numpy().copy()
+    np_intensity = np.concatenate(list(static_intensity.cpu().numpy()), axis=1).copy()  # planes tiled left to right
     np_truth = (static_truth.squeeze().cpu().numpy() * static_mask).copy()
 
     static_intensity_gpu = static_intensity.unsqueeze(0).to(device)
@@ -92,7 +93,7 @@ def train_model(
     )
 
     # 3. Initialize Model and Verify ALL Parameters are Unfrozen (requires_grad = True)
-    model = UNet(cfg, in_channels=1, out_channels=1, mode=model_mode, negative_slope=0.1).to(device)
+    model = UNet(cfg, out_channels=1, mode=model_mode, negative_slope=0.1).to(device)
     
     # Ensure every single layer has requires_grad = True
     for name, param in model.named_parameters():
@@ -200,7 +201,7 @@ def train_model(
             fig, axes = plt.subplots(1, 5, figsize=(22, 4.5))
 
             axes[0].imshow(np_intensity, cmap='inferno')
-            axes[0].set_title(f"Input Sensor ({crop_size}x{crop_size})", fontsize=11)
+            axes[0].set_title(f"Input planes {cfg.diversity_defocus} ({crop_size}x{crop_size})", fontsize=11)
             axes[0].axis('off')
 
             c2 = axes[1].imshow(np_truth, cmap='RdBu', extent=cfg.extent, vmin=-2.0, vmax=2.0)
@@ -236,6 +237,8 @@ if __name__ == "__main__":
     parser.add_argument('--samples-per-epoch', type=int, default=2048, help="Samples per epoch (default: 2048)")
     parser.add_argument('--crop-size', type=int, default=OpticsConfig.crop_size,
                         help=f"Crop size for intensity (default: {OpticsConfig.crop_size})")
+    parser.add_argument('--diversity', type=str, default=','.join(str(d) for d in OpticsConfig.diversity_defocus),
+                        help="Comma-separated diversity defocus per plane, Noll-4 RMS radians (sets K)")
     parser.add_argument('--save-dir', type=str, default='saved_models', help="Checkpoint output directory")
     parser.add_argument('--progress-dir', type=str, default='training_progress', help="Diagnostic figure directory")
     parser.add_argument('--lr', type=float, default=3e-4, help="Initial learning rate (default: 3e-4)")
@@ -249,7 +252,8 @@ if __name__ == "__main__":
         samples_per_epoch=args.samples_per_epoch,
         initial_lr=args.lr,
         coeff_weight=args.coeff_weight,
-        cfg=OpticsConfig(crop_size=args.crop_size),
+        cfg=OpticsConfig(crop_size=args.crop_size,
+                         diversity_defocus=tuple(float(d) for d in args.diversity.split(','))),
         model_mode=args.mode,
         save_dir=args.save_dir,
         progress_dir=args.progress_dir

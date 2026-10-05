@@ -1,5 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 import sys
 import os
 
@@ -22,12 +23,12 @@ def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int
     sample = test_dataset[0]
     intensity_input, true_phase = sample[0], sample[1]
     
-    # Add the batch dimension [1, 1, crop, crop] expected by the network
+    # Add the batch dimension [1, K, crop, crop] expected by the network
     intensity_input = intensity_input.unsqueeze(0).to(device)
     true_phase = true_phase.to(device)
 
     # 3. Load the trained network
-    model = UNet(cfg, in_channels=1, out_channels=1).to(device)
+    model = UNet(cfg, out_channels=1).to(device)
 
     # Raises if the checkpoint is missing or does not match; never runs with random weights
     load_checkpoint_strict(model, model_path, device)
@@ -51,7 +52,7 @@ def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int
     mean_prediction = torch.mean(predictions_tensor, dim=0).squeeze()
     variance_map = torch.var(predictions_tensor, dim=0).squeeze()
     
-    return intensity_input.squeeze(), true_phase.squeeze(), mean_prediction, variance_map, test_dataset.mask.squeeze()
+    return intensity_input[0], true_phase.squeeze(), mean_prediction, variance_map, test_dataset.mask.squeeze()
 
 if __name__ == "__main__":
     model_path = 'saved_models/unet_phase_retrieval_best.pth'
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     intensity, truth, mean_pred, uncertainty, mask = run_monte_carlo_inference(model_path, cfg, mc_passes=50)
     
     # Move tensors to CPU and convert to NumPy for Matplotlib
-    intensity = intensity.cpu().numpy()
+    intensity = np.concatenate(list(intensity.cpu().numpy()), axis=1)  # diversity planes tiled left to right
     truth = truth.cpu().numpy()
     mean_pred = mean_pred.cpu().numpy()
     uncertainty = uncertainty.cpu().numpy()

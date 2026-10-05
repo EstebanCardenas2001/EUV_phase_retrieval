@@ -31,10 +31,12 @@ def preprocess_intensity(
        preserving the faint outer rings.
     2. High-Dynamic-Range log10 compression: log10(clamp(I, min=0) + epsilon), boosting
        faint high-angle diffraction fringes that encode high-frequency phase details.
-    3. Strict [0, 1] Min-Max normalization per sample to bound tensor inputs for the CNN.
-    
+    3. Strict [0, 1] Min-Max normalization per sample, shared across the K diversity planes.
+       Every plane carries the same total energy, so the relative peak heights between planes
+       encode how much each one is blurred by the diversity defocus; per-channel min-max would erase that.
+
     Args:
-        intensity: Tensor of shape [H, W], [1, H, W], or [B, 1, H, W].
+        intensity: Tensor of shape [H, W], [K, H, W], or [B, K, H, W].
         crop_size: Center crop dimension (default: 128).
         epsilon: Numerical stability floor (1e-4).
     Returns:
@@ -62,13 +64,9 @@ def preprocess_intensity(
     # 2. High-Dynamic-Range log10 compression to restore fringe visibility
     i_log = torch.log10(cropped + epsilon)
     
-    # 3. Strict [0, 1] Min-Max normalization per sample
-    if i_log.dim() >= 3:
-        i_min = i_log.amin(dim=(-2, -1), keepdim=True)
-        i_max = i_log.amax(dim=(-2, -1), keepdim=True)
-    else:
-        i_min = i_log.min()
-        i_max = i_log.max()
+    # 3. Strict [0, 1] Min-Max normalization per sample, shared across planes (i_log is at least [K, H, W] here)
+    i_min = i_log.amin(dim=(-3, -2, -1), keepdim=True)
+    i_max = i_log.amax(dim=(-3, -2, -1), keepdim=True)
         
     i_norm = (i_log - i_min) / (i_max - i_min + epsilon)
     i_norm = torch.clamp(i_norm, 0.0, 1.0)
@@ -142,18 +140,17 @@ class PhaseRetrievalDataset(Dataset):
         phase, coeffs = self.sample_phase()
 
         with torch.no_grad():
-            intensity = self.simulator(phase, noise_std=self.noise_std)
-            
+            intensity = self.simulator(phase, noise_std=self.noise_std)  # [K, N, N]
+
             # 2. High-Dynamic-Range log10 compression + strict [0, 1] Min-Max normalization
-            # Applied directly to 128x128 cropped intensity to preserve faint outer diffraction rings
-            intensity_norm = preprocess_intensity(
+            # Applied directly to the cropped intensity planes to preserve faint outer diffraction rings
+            intensity_out = preprocess_intensity(
                 intensity,
                 crop_size=self.crop_size,
                 epsilon=1e-4
-            )
-            
-        intensity_out = intensity_norm.unsqueeze(0) if intensity_norm.dim() == 2 else intensity_norm  # [1, 128, 128]
-        phase_out = phase.unsqueeze(0)               # [1, 256, 256]
+            )  # [K, crop, crop]
+
+        phase_out = phase.unsqueeze(0)               # [1, N, N]
         
         if self.return_coeffs:
             return intensity_out, phase_out, coeffs

@@ -1,0 +1,13 @@
+[
+  {
+    "layout": "K=1 in focus",
+    "delta": 0.0,
+    "planes": [
+      0.0
+    ],
+    "twin_sep_median": 1.6013444792406517e-07,
+    "closer_to_truth": 0.5833333730697632,
+    "converged_0p1": 0.02083333395421505,
+    "rmse_truth_median": 1.7383575439453125,
+    "rmse_twin_median": 1.9476066827774048,
+    "crop_energy_p1": 

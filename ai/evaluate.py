@@ -14,15 +14,8 @@ from ai.dataset import PhaseRetrievalDataset
 from ai.unet import UNet
 from physics.config import OpticsConfig
 from physics.zernike import noll_to_nm, get_noll_polynomial
-
-def twin_phase(phase: torch.Tensor) -> torch.Tensor:
-    """
-    Twin-image transform phi(r) -> -phi(-r) on the last two dims.
-    The grid has r = 0 at pixel N/2, so r -> -r maps index i to (N - i) mod N,
-    which is a flip followed by a roll of one pixel (a plain flip is off by one).
-    """
-    flipped = torch.flip(phase, dims=(-2, -1))
-    return -torch.roll(flipped, shifts=(1, 1), dims=(-2, -1))
+from physics.simulator import OpticalSystem, twin_phase
+from dataclasses import replace
 
 def load_checkpoint_strict(model: torch.nn.Module, path: str, device) -> None:
     """Loads weights or raises. Never falls back to random weights."""
@@ -44,7 +37,9 @@ def self_check(dataset: PhaseRetrievalDataset, is_even: np.ndarray) -> dict:
     """
     Verifies the twin map before trusting the analysis:
     1. twin(phase) equals the phase synthesized with even-mode coefficients negated.
-    2. A phase and its twin give identical noise-free Fraunhofer intensity.
+    2. A phase and its twin give identical noise-free intensity for a single in-focus plane.
+    3. Reports how far apart they are under the configured diversity planes (must differ unless
+       the config is a single in-focus plane).
     """
     coeffs = torch.randn(len(dataset.noll_indices))
     phase = torch.sum(coeffs.view(-1, 1, 1) * dataset.basis, dim=0)
@@ -52,14 +47,21 @@ def self_check(dataset: PhaseRetrievalDataset, is_even: np.ndarray) -> dict:
     phase_twin_coeffs = torch.sum((coeffs * sign).view(-1, 1, 1) * dataset.basis, dim=0)
     coeff_err = (twin_phase(phase) - phase_twin_coeffs).abs().max().item()
 
+    in_focus = OpticalSystem(replace(dataset.cfg, diversity_defocus=(0.0,)))
     with torch.no_grad():
-        i_phi = dataset.simulator(phase, noise_std=0.0)
-        i_twin = dataset.simulator(twin_phase(phase), noise_std=0.0)
+        i_phi = in_focus(phase)
+        i_twin = in_focus(twin_phase(phase))
+        s_phi = dataset.simulator(phase)
+        s_twin = dataset.simulator(twin_phase(phase))
     intensity_rel_err = ((i_phi - i_twin).abs().max() / i_phi.max()).item()
+    stack_rel_diff = ((s_phi - s_twin).abs().max() / s_phi.max()).item()
 
     assert coeff_err < 1e-4, f"Twin map does not match even-mode sign flip (max err {coeff_err:.2e})"
-    assert intensity_rel_err < 1e-4, f"Twin intensity differs (max rel err {intensity_rel_err:.2e})"
-    return {"twin_vs_coeff_flip_max_abs": coeff_err, "twin_intensity_max_rel": intensity_rel_err}
+    assert intensity_rel_err < 1e-4, f"In-focus twin intensity differs (max rel err {intensity_rel_err:.2e})"
+    if dataset.cfg.diversity_defocus != (0.0,):
+        assert stack_rel_diff > 1e-2, f"Diversity stack does not distinguish the twin (rel diff {stack_rel_diff:.2e})"
+    return {"twin_vs_coeff_flip_max_abs": coeff_err, "twin_in_focus_max_rel": intensity_rel_err,
+            "twin_diversity_stack_max_rel": stack_rel_diff}
 
 def evaluate(
     checkpoint: str,
@@ -67,13 +69,15 @@ def evaluate(
     seed: int = 1234,
     mode: str = 'hybrid',
     batch_size: int = 64,
-    out_dir: str = 'eval'
+    out_dir: str = 'eval',
+    cfg: OpticsConfig = None
 ):
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    cfg = OpticsConfig()
-    model = UNet(cfg, in_channels=1, out_channels=1, mode=mode).to(device)
+    if cfg is None:
+        cfg = OpticsConfig()
+    model = UNet(cfg, out_channels=1, mode=mode).to(device)
     load_checkpoint_strict(model, checkpoint, device)
     model.eval()
     print(f"Loaded {checkpoint} (mode={mode}) on {device}")
@@ -243,5 +247,9 @@ if __name__ == "__main__":
                         help="Architecture mode the checkpoint was trained with (not stored in legacy checkpoints)")
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--out-dir', type=str, default='eval')
+    parser.add_argument('--diversity', type=str, default=None,
+                        help="Comma-separated diversity defocus the checkpoint was trained with (default: OpticsConfig)")
     args = parser.parse_args()
-    evaluate(args.checkpoint, args.num_samples, args.seed, args.mode, args.batch_size, args.out_dir)
+    cfg = OpticsConfig() if args.diversity is None else \
+        OpticsConfig(diversity_defocus=tuple(float(d) for d in args.diversity.split(',')))
+    evaluate(args.checkpoint, args.num_samples, args.seed, args.mode, args.batch_size, args.out_dir, cfg)

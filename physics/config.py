@@ -31,13 +31,17 @@ class OpticsConfig:
     # Gaussian sensor noise std as a fraction of the unaberrated peak intensity.
     # 1.208e-6 reproduces the previous absolute noise_std=0.02 at pupil_radius=0.004 (peak 16553).
     noise_rel: float = 1.208e-6
-    diversity_defocus: tuple = (0.0,)  # extra defocus per measured plane (Phase 3)
+    # Extra Noll-4 defocus per measured plane [rad RMS]. K = 3 at +-1.0 resolves the twin ambiguity:
+    # the pixelwise solver recovers 96/96 random training phases (ai/diversity_study.py).
+    diversity_defocus: tuple = (-1.0, 0.0, 1.0)
 
     def __post_init__(self):
         # Normalize sequences to tuples so configs round-trip through asdict/JSON lists
         object.__setattr__(self, 'noll_indices', tuple(int(j) for j in self.noll_indices))
         object.__setattr__(self, 'diversity_defocus', tuple(float(d) for d in self.diversity_defocus))
 
+        if self.K < 1:
+            raise ValueError("diversity_defocus needs at least one plane")
         if self.N % 2 != 0:
             raise ValueError(f"N must be even, got {self.N}")
         # Intensity is the autocorrelation of the pupil field, so its support is 2D - 1 pixels.
@@ -63,6 +67,11 @@ class OpticsConfig:
     @property
     def Q(self) -> float:
         return self.N / self.pupil_diameter_px
+
+    @property
+    def K(self) -> int:
+        """Number of phase-diversity planes (network input channels)."""
+        return len(self.diversity_defocus)
 
     @property
     def num_modes(self) -> int:
