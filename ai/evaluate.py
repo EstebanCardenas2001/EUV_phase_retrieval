@@ -21,19 +21,20 @@ def even_mode_mask(noll_indices) -> np.ndarray:
     """True for modes with even |m| (centrosymmetric, sign flips under the twin map)."""
     return np.array([abs(noll_to_nm(int(j))[1]) % 2 == 0 for j in noll_indices])
 
-def make_coeff_projector(cfg: OpticsConfig):
+def make_coeff_projector(cfg: OpticsConfig, device=torch.device('cpu'), dtype=torch.float64):
     """
-    Least-squares projection of pupil phases [B, N, N] (CPU) onto the cfg basis -> coefficients [B, M].
+    Least-squares projection of pupil phases [B, N, N] (on device) onto the cfg basis -> coefficients [B, M].
     Fits [piston, basis] so piston-removed truth recovers its synthesis coefficients exactly.
     """
     geo = cfg.build_geometry()
     pupil = geo.mask > 0.5
     piston = get_noll_polynomial(1, geo.rho, geo.theta, geo.mask)
     design = torch.cat([piston[pupil].unsqueeze(1), geo.basis[:, pupil].T], dim=1).double()
-    projector = torch.linalg.pinv(design)  # [1 + M, P]
+    projector = torch.linalg.pinv(design).to(device, dtype)  # [1 + M, P]
+    pupil = pupil.to(device)
 
     def project(phases: torch.Tensor) -> torch.Tensor:
-        return (projector @ phases[:, pupil].T.double()).T[:, 1:].float()
+        return (projector @ phases[:, pupil].T.to(dtype)).T[:, 1:].float()
     return project
 
 def r2_score(pred: np.ndarray, true: np.ndarray) -> np.ndarray:

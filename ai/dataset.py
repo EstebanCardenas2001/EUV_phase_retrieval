@@ -102,6 +102,8 @@ class PhaseRetrievalDataset(Dataset):
 
         self.simulator = OpticalSystem(cfg, device=device)
         self.noise_std = cfg.noise_rel * self.simulator.peak_intensity
+        # Multiplies every coefficient bound; > 1 gives out-of-distribution aberrations for UQ tests
+        self.coeff_scale = 1.0
 
         # Precompute the grid and Zernike basis on device for fast synthesis
         geo = cfg.build_geometry(device)
@@ -120,10 +122,11 @@ class PhaseRetrievalDataset(Dataset):
         # Sample primary aberrations (defocus: 4, astigmatisms: 5,6, comas: 7,8, spherical: 11) with larger magnitude.
         # Coefficients are in RMS radians (Noll-normalized basis); see coeff_bound for the ranges.
         for i, j in enumerate(self.noll_indices):
+            bound = coeff_bound(j) * self.coeff_scale
             if j in PRIMARY_MODES:
-                coeffs[i] = random.uniform(-coeff_bound(j), coeff_bound(j))
+                coeffs[i] = random.uniform(-bound, bound)
             else:
-                coeffs[i] = random.uniform(-coeff_bound(j), coeff_bound(j)) if random.random() < 0.6 else 0.0
+                coeffs[i] = random.uniform(-bound, bound) if random.random() < 0.6 else 0.0
                 
         # Synthesize ground truth phase from precomputed basis
         phase = torch.sum(coeffs.view(-1, 1, 1) * self.basis, dim=0)

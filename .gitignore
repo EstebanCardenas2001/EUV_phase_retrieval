@@ -1,18 +1,10 @@
+# Environment and caches
 .venv/
 __pycache__/
 *.pyc
 .DS_Store
-.venv/
-__pycache__/
-*.pyc
-.DS_Store
-*.pth
-*.pt
-training_progress/
-.venv/
-__pycache__/
-*.pyc
-.DS_Store
+
+# Checkpoints and per-epoch training figures (eval/ outputs stay tracked)
 *.pth
 *.pt
 training_progress/

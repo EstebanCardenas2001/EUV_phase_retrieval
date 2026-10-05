@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-EUV phase retrieval in PyTorch: recover a pupil-plane phase map (aberrations expressed in Zernike modes) from a far-field diffraction intensity image. Two approaches share one differentiable physics engine:
-- `solver/`: classical per-sample inversion by gradient descent through the simulator.
-- `ai/`: a learned network (Attention Res-UNet + Zernike modal head) trained on synthetic data, with Monte Carlo dropout for uncertainty.
+EUV phase retrieval in PyTorch: recover a pupil-plane phase map (Zernike aberrations) from far-field diffraction intensity. A single in-focus image cannot determine the phase: φ(r) and its twin −φ(−r) give identical intensity, so the sign of every even-|m| Zernike mode is lost. The repo therefore measures **K phase-diversity planes** (the same wavefront plus known extra defocus, default −1, 0, +1 rad RMS), which breaks the ambiguity. Two approaches share one differentiable physics engine:
+- `solver/`: classical pixelwise gradient-descent inversion through the simulator, fitting all K planes jointly.
+- `ai/`: Attention Res-UNet + Zernike modal head trained on synthetic K-plane stacks, with MC-dropout uncertainty.
 
 ## Commands
 
@@ -14,45 +14,43 @@ Environment: Python virtualenv in `.venv/`, dependencies pinned in `requirements
 
 ```bash
 source .venv/bin/activate
-pip install -r requirements.txt
 
-# Train (writes saved_models/*.pth and training_progress/epoch_XXX.png relative to CWD)
-python ai/train.py --epochs 150 --batch-size 32 --samples-per-epoch 2048 --mode hybrid
-python ai/train.py --epochs 2 --samples-per-epoch 64     # quick smoke run
+# Train -> <save-dir>/{best,final}.pth (best = lowest validation loss), training_log.json, figures in --progress-dir
+python ai/train.py --epochs 150 --batch-size 32 --samples-per-epoch 2048 --save-dir saved_models/<run> --progress-dir training_progress/<run>
+python ai/train.py --epochs 3 --samples-per-epoch 128 --save-dir /tmp/smoke --progress-dir /tmp/smoke_p   # smoke run
 
-# MC-dropout inference on one fresh synthetic sample -> uq_monte_carlo.png
-python ai/inference_uq.py
+# Evaluation (config is rebuilt from the checkpoint; no geometry flags)
+python ai/evaluate.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>        # per-mode R², twin analysis
+python ai/uq_calibration.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>  # MC-dropout calibration
+python ai/inference_uq.py --checkpoint saved_models/<run>/best.pth                         # -> uq_monte_carlo.png
 
-# Classical gradient-descent solver demo
-python solver/gradient_descent.py
-
-# Module self-checks (each file has a __main__ demo)
-python ai/unet.py            # shape check + parameter count
-python physics/simulator.py  # forward-model visualization
+# Physics studies and self-checks
+python ai/diversity_study.py      # diversity layout x defocus sweep with the solver -> eval/diversity_study.png
+python ai/crop_energy.py          # energy kept by the intensity crop (worst plane)
+python solver/gradient_descent.py # solver demo, prints RMSE vs truth and vs twin
+python physics/config.py          # geometry / Q check
+python physics/zernike.py         # Zernike RMS + Gram-matrix orthonormality check
+python ai/unet.py                 # model shape check
 ```
 
-Run all scripts from the repo root: output paths (`saved_models/`, `training_progress/`, `uq_monte_carlo.png`) are relative to CWD. There is no test suite, linter, or build step.
-
-`physics/zernike.py`'s `__main__` uses `from grid import ...`, so it only runs from inside `physics/`.
+Run scripts from the repo root (output paths are relative to CWD). There is no test suite or linter; verification is the self-checks above plus a smoke run. Do not launch full training runs (the user trains on their own GPU) and never write into `saved_models/` root: the legacy `unet_phase_retrieval*.pth` files there are kept on purpose and no longer load.
 
 ## Architecture
 
-**Imports.** No packaging. Each script does `sys.path.append(<repo root>)` and then imports `physics.*` / `ai.*` absolutely. Only `physics/` has an `__init__.py`. Keep that pattern in new entry-point scripts.
+**Imports.** No packaging. Each script does `sys.path.append(<repo root>)` and imports `physics.*` / `ai.*` / `solver.*` absolutely. Keep that pattern in new entry points.
 
-**Shared optical geometry.** Defaults used throughout: `N=256` pixels, `L=0.01` m grid, `pupil_radius=0.004` m. `physics/grid.py` builds the coordinate grid and circular pupil mask. `physics/zernike.py` gives Noll-indexed Zernike polynomials (j=1..22, plus a name→index map) and `compute_zernike_basis`. The models use Noll 4–22 (19 modes; piston/tip/tilt excluded). The dataset, the model and the simulator each rebuild the grid, mask and basis independently, so changing N/L/pupil_radius/noll_indices means keeping all three in sync.
+**Config is the single source of truth** (`physics/config.py`, frozen `OpticsConfig`): `N`, `L`, `pupil_radius`, `noll_indices` (4–22), `crop_size`, `noise_rel`, `diversity_defocus` (K = its length). `cfg.build_geometry()` is the only place the grid, mask, ρ/θ and Zernike basis are built; the simulator, dataset, model, solver and scripts all take `cfg`. `__post_init__` enforces intensity Nyquist sampling on the actual mask footprint (2D − 1 ≤ N, i.e. Q ≥ 2; default 123 px pupil, Q = 2.08) and `crop_size % 8 == 0`.
 
-**Forward model** (`physics/simulator.py`, `OpticalSystem`): `mask * exp(i·phase)` → centered `fft2` → `|·|²/N²`, with optional additive Gaussian noise clamped ≥0. It is differentiable, which is what the solver relies on.
+**Zernikes** (`physics/zernike.py`) are Noll-normalized (unit RMS on the unit disk), so coefficients are in **RMS radians** and the basis is ~orthonormal on the pixelated pupil. `noll_to_nm` gives (n, m); even |m| ⇔ centrosymmetric ⇔ flips sign under the twin map.
 
-**Data** (`ai/dataset.py`): `PhaseRetrievalDataset` synthesizes samples on the fly (random every `__getitem__`, no stored data). Primary modes (4,5,6,7,8,11) are drawn from U(-2,2); the others are sparse U(-0.8,0.8). Piston is removed within the pupil, and the simulator runs with `noise_std=0.02`. Intensity goes through `preprocess_intensity`: center crop to 128, then log10(I+1e-4), then per-sample min-max to [0,1]. Returns `(intensity[1,128,128], phase[1,256,256], coeffs[19])`. Any real-data or inference path must apply the same `preprocess_intensity`.
+**Forward model** (`physics/simulator.py`): `OpticalSystem(cfg)(phase[..., N, N]) -> intensity[..., K, N, N]`; plane k propagates `mask·exp(i(φ + d_k·Z4))` with a centered FFT over the last two dims, `|·|²/N²`. Noise is additive Gaussian with std `cfg.noise_rel × peak_intensity` (relative, so pupil changes do not change SNR). `twin_phase()` implements φ → −φ(−r); r = 0 sits at pixel N/2, so it is flip + roll by one pixel, not a plain flip.
 
-**Model** (`ai/unet.py`, `AttentionResUNet`, aliased as `UNet`): the input is 128×128 and the output is 256×256.
-- A residual encoder (features `[64,128,256]`) feeds a bottleneck with `Dropout2d(0.3)`.
-- Modal branch: GAP → MLP (with dropout) → 19 coefficients (clamped ±20) → `DifferentiableZernikeGenerator` (einsum with the registered basis) → 256×256 modal phase.
-- Spatial branch: attention-gated U-Net decoder → bilinear upsample to 256 → refinement block → residual phase (clamped ±30).
-- `mode`: `'hybrid'` = modal + residual, `'modal'`, or `'unet'`. The output is always multiplied by the pupil mask.
-- `forward(..., return_components=True)` → `(total, coeffs, modal, residual)`.
-- `enable_mc_dropout()` turns dropout back on after `eval()` for UQ.
+**Data** (`ai/dataset.py`): samples are synthesized on the fly. `coeff_bound(j)` gives uniform ranges in RMS rad (primary modes 4,5,6,7,8,11 and sparse secondaries). Intensity → `preprocess_intensity`: center crop, log10(I + 1e-4), then **one** min-max across all K planes of a sample (per-channel normalization would erase the relative peak heights that encode defocus blur). Returns `(intensity[K, crop, crop], phase[1, N, N], coeffs[M])`. Any inference path must use the same preprocessing.
 
-**Training** (`ai/train.py`): pure FP32 (no AMP, on purpose), AdamW, ReduceLROnPlateau on the epoch's training loss, grad clipping at 1.0. The loss is masked phase MSE (inside the pupil only) + `coeff_weight` × coefficient MSE + 0.1 × residual-phase energy outside the pupil. There is no validation set. The "best" checkpoint is chosen by training loss, and sample 0 is used as a fixed visual anchor for the per-epoch diagnostic PNGs. The DataLoader uses 4 workers when CUDA is available, and the dataset is built on CPU for worker compatibility.
+**Model** (`ai/unet.py`, `AttentionResUNet` = `UNet`): input `K × crop × crop`, output `1 × N × N`. Residual encoder → bottleneck (Dropout2d) → modal head (GAP → MLP → coefficients → `DifferentiableZernikeGenerator`) plus attention-gated decoder → residual phase; `mode` = `hybrid` (sum), `modal`, or `unet`; output is masked. Mask/basis buffers are non-persistent: geometry always comes from the config, never from weights.
 
-**Checkpoints.** `saved_models/unet_phase_retrieval_{best,final}.pth` are bare `state_dict`s, with no saved config. `inference_uq.py` builds `UNet()` with default args (hybrid mode, default features), so a checkpoint trained with a different `--mode`/architecture will not load there without matching changes. `saved_models/unet_phase_retrieval.pth` is an older checkpoint and may not match the current architecture.
+**Training** (`ai/train.py`): pure FP32 on purpose (no AMP). Loss = pupil-masked phase MSE + `coeff_weight` × coefficient squared error **summed over modes** (same scale as phase MSE thanks to orthonormality) + 0.1 × residual energy outside the pupil. A fixed validation set (512 samples, seed 12345, generated without disturbing the training RNG stream) drives ReduceLROnPlateau and best-checkpoint selection; per-mode validation R² is logged every `--r2-every` epochs.
+
+**Checkpoints** (`ai/checkpoint.py`): `{model_state, config (asdict), model_kwargs, epoch, val_loss, format}`. Always load through `load_model(path)`, which rebuilds config + architecture and loads strictly; it raises on missing files and legacy bare state_dicts instead of falling back to random weights or default geometry.
+
+**Metrics conventions.** `ai/evaluate.py` reports R² both for the modal head and for an LSQ projection of the *total* predicted phase onto the basis (in hybrid mode the residual branch carries real signal), plus twin-aware scores. Pixelwise solver errors must be compared modulo 2π and piston (`wrapped_pupil_rmse`), since the solver can settle into 2π-wrapped but physically identical phases.
