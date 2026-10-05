@@ -32,16 +32,22 @@ def noll_to_nm(j: int):
     m = (-1) ** j * ((n % 2) + 2 * ((j1 + ((n + 1) % 2)) // 2))
     return n, m
 
+def noll_norm(j: int) -> float:
+    """Noll normalization factor giving unit RMS over the unit disk: sqrt(n+1) if m = 0, else sqrt(2(n+1))."""
+    n, m = noll_to_nm(j)
+    return math.sqrt(n + 1) if m == 0 else math.sqrt(2 * (n + 1))
+
 def get_noll_polynomial(j: int, rho: torch.Tensor, theta: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
-    Evaluates the Zernike polynomial corresponding to Noll index j (1 to 22).
+    Evaluates the Noll-normalized Zernike polynomial for Noll index j (1 to 22).
+    Each mode has unit RMS over the unit disk, so coefficients are in RMS radians.
     """
     if j == 1:
         Z = torch.ones_like(rho)
     elif j == 2:
-        Z = 2 * rho * torch.cos(theta)
+        Z = rho * torch.cos(theta)
     elif j == 3:
-        Z = 2 * rho * torch.sin(theta)
+        Z = rho * torch.sin(theta)
     elif j == 4:
         Z = 2 * rho**2 - 1
     elif j == 5:
@@ -82,7 +88,7 @@ def get_noll_polynomial(j: int, rho: torch.Tensor, theta: torch.Tensor, mask: to
         Z = 20 * rho**6 - 30 * rho**4 + 12 * rho**2 - 1
     else:
         raise ValueError(f"Unsupported Noll index: {j}. Supported indices are 1 to 22.")
-    return Z * mask
+    return noll_norm(j) * Z * mask
 
 NOLL_NAME_MAP = {
     'piston': 1,
@@ -135,6 +141,25 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from physics.config import OpticsConfig
     cfg = OpticsConfig()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    basis = cfg.build_geometry(device).basis
-    print(f"Zernike basis precomputed: {basis.shape} on {device}")
+    geo = cfg.build_geometry()
+    pupil = geo.mask > 0.5
+    print(f"Pixelated pupil: {cfg.pupil_diameter_px} px footprint, {int(pupil.sum())} pixels")
+
+    # Normalization check over all Noll modes 1..22 on the pixelated pupil.
+    # Gram matrix G_ij = mean over pupil of Z_i * Z_j; orthonormal modes give G = I.
+    js = list(range(1, 23))
+    full = compute_zernike_basis(geo.rho, geo.theta, geo.mask, js)[:, pupil].double()  # [22, P]
+    G = full @ full.T / full.shape[1]
+    rms = G.diag().sqrt()
+    off = G - torch.diag(G.diag())
+    i, k = divmod(int(off.abs().argmax()), len(js))
+    print(f"{'Noll':>4} {'(n,m)':>7} {'norm':>6} {'RMS':>7}")
+    for idx, j in enumerate(js):
+        n, m = noll_to_nm(j)
+        print(f"{j:>4} {f'({n},{m})':>7} {noll_norm(j):>6.3f} {rms[idx].item():>7.4f}")
+    print(f"RMS range: [{rms.min().item():.4f}, {rms.max().item():.4f}]")
+    print(f"Max |off-diagonal| Gram entry: {off.abs().max().item():.4f} (Noll {js[i]} x Noll {js[k]})")
+    sub = G[3:, 3:]  # Noll 4..22, the modes the models use
+    print(f"Noll 4-22 only: max |off-diagonal| {(sub - torch.diag(sub.diag())).abs().max().item():.4f}")
+    assert (rms - 1).abs().max() < 0.05, "Mode RMS deviates from 1 by more than 5%"
+    assert off.abs().max() < 0.05, "Basis is not close to orthonormal on the pixelated pupil"

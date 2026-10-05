@@ -37,8 +37,8 @@ def run_inverse_solver(cfg: OpticsConfig = None):
     geo = cfg.build_geometry(device)
 
     # Let's hide a complex combination of aberrations
-    true_phase = (zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'astigmatism_vertical') * 2.0 +
-                  zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'coma_horizontal') * -1.5)
+    true_phase = (zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'astigmatism_vertical') * 0.816 +  # RMS rad (= 2.0 unnormalized)
+                  zernike_polynomial(geo.rho, geo.theta, simulator.mask, 'coma_horizontal') * -0.530)     # RMS rad (= -1.5 unnormalized)
     
     # Run it through the simulator to get the sensor measurement. We detach it from 
     # the computation graph because it is our fixed target, not a variable.

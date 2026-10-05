@@ -7,6 +7,18 @@ import random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from physics.config import OpticsConfig
 from physics.simulator import OpticalSystem
+from physics.zernike import noll_norm
+
+PRIMARY_MODES = (4, 5, 6, 7, 8, 11)
+
+def coeff_bound(j: int) -> float:
+    """
+    Half-width of the uniform coefficient distribution for Noll mode j, in RMS radians.
+    The pre-normalization ranges were U(-2, 2) for primary modes and U(-0.8, 0.8) for the rest,
+    on unnormalized polynomials. Dividing by the Noll factor gives the same phase maps,
+    so the peak-to-valley distribution is unchanged.
+    """
+    return (2.0 if j in PRIMARY_MODES else 0.8) / noll_norm(j)
 
 def preprocess_intensity(
     intensity: torch.Tensor,
@@ -106,13 +118,14 @@ class PhaseRetrievalDataset(Dataset):
         """Draws random Zernike coefficients from the training distribution; returns (phase [N, N], coeffs [M])."""
         num_modes = len(self.noll_indices)
         coeffs = torch.zeros(num_modes, dtype=torch.float32, device=self.basis.device)
-        
-        # Sample primary aberrations (defocus: 4, astigmatisms: 5,6, comas: 7,8, spherical: 11) with larger magnitude
+
+        # Sample primary aberrations (defocus: 4, astigmatisms: 5,6, comas: 7,8, spherical: 11) with larger magnitude.
+        # Coefficients are in RMS radians (Noll-normalized basis); see coeff_bound for the ranges.
         for i, j in enumerate(self.noll_indices):
-            if j in (4, 5, 6, 7, 8, 11):
-                coeffs[i] = random.uniform(-2.0, 2.0)
+            if j in PRIMARY_MODES:
+                coeffs[i] = random.uniform(-coeff_bound(j), coeff_bound(j))
             else:
-                coeffs[i] = random.uniform(-0.8, 0.8) if random.random() < 0.6 else 0.0
+                coeffs[i] = random.uniform(-coeff_bound(j), coeff_bound(j)) if random.random() < 0.6 else 0.0
                 
         # Synthesize ground truth phase from precomputed basis
         phase = torch.sum(coeffs.view(-1, 1, 1) * self.basis, dim=0)

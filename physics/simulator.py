@@ -74,8 +74,8 @@ if __name__ == "__main__":
     geo = cfg.build_geometry(device)
 
     # Combine Zernike modes with arbitrary severity coefficients
-    phase_coma = zernike_polynomial(geo.rho, geo.theta, geo.mask, 'coma_horizontal') * 3.5
-    phase_astig = zernike_polynomial(geo.rho, geo.theta, geo.mask, 'astigmatism_vertical') * 2.0
+    phase_coma = zernike_polynomial(geo.rho, geo.theta, geo.mask, 'coma_horizontal') * 1.237  # RMS rad (= 3.5 unnormalized)
+    phase_astig = zernike_polynomial(geo.rho, geo.theta, geo.mask, 'astigmatism_vertical') * 0.816  # RMS rad (= 2.0 unnormalized)
     total_phase = phase_coma + phase_astig
 
     # Run the forward pass to get the sensor intensity
