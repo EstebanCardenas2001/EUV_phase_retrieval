@@ -300,8 +300,12 @@ def train_model(
 
             err_map = np.abs(pred_np - np_truth) * static_mask
             err_map = np.nan_to_num(err_map, nan=0.0, posinf=0.0, neginf=0.0)
-            c5 = axes[4].imshow(err_map, cmap='magma', extent=cfg.extent, vmin=0.0, vmax=4.0)
-            axes[4].set_title(f"Abs Error Map (Ep {current_epoch})", fontsize=11)
+            # Scale to the data (99th percentile, at least 0.1 rad) so small late-training errors stay visible
+            pupil_err = err_map[static_mask > 0.5]
+            err_vmax = max(float(np.percentile(pupil_err, 99)), 0.1)
+            c5 = axes[4].imshow(err_map, cmap='magma', extent=cfg.extent, vmin=0.0, vmax=err_vmax)
+            axes[4].set_title(f"Abs Error (Ep {current_epoch}, RMS {np.sqrt(np.mean(pupil_err ** 2)):.3f} rad)",
+                              fontsize=11)
             fig.colorbar(c5, ax=axes[4], fraction=0.046, pad=0.04)
 
             plt.tight_layout()
