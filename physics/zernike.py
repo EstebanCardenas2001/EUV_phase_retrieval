@@ -19,6 +19,19 @@ def get_polar_coordinates(X: torch.Tensor, Y: torch.Tensor, pupil_radius: float)
     
     return rho, theta
 
+def noll_to_nm(j: int):
+    """
+    Converts a Noll index j (>= 1) to the radial order n and signed azimuthal frequency m.
+    Modes with even |m| are centrosymmetric (Z(-r) = Z(r)); odd |m| are antisymmetric.
+    """
+    n = 0
+    j1 = j - 1
+    while j1 > n:
+        n += 1
+        j1 -= n
+    m = (-1) ** j * ((n % 2) + 2 * ((j1 + ((n + 1) % 2)) // 2))
+    return n, m
+
 def get_noll_polynomial(j: int, rho: torch.Tensor, theta: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
     Evaluates the Zernike polynomial corresponding to Noll index j (1 to 22).

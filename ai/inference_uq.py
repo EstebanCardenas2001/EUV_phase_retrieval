@@ -9,6 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Import our custom modules
 from ai.dataset import PhaseRetrievalDataset
 from ai.unet import UNet
+from ai.evaluate import load_checkpoint_strict
 
 def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
     # 1. Hardware Optimization: Utilize CUDA if available, fallback to MPS/CPU
@@ -26,16 +27,10 @@ def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
 
     # 3. Load the trained network
     model = UNet(in_channels=1, out_channels=1).to(device)
-    
-    # Check for best model first if requested model path does not exist
-    if not os.path.exists(model_path) and os.path.exists('saved_models/unet_phase_retrieval_best.pth'):
-        model_path = 'saved_models/unet_phase_retrieval_best.pth'
 
-    if os.path.exists(model_path):
-        model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
-        print(f"Loaded trained model weights from {model_path}.")
-    else:
-        print(f"Warning: {model_path} not found. Running with untrained random weights.")
+    # Raises if the checkpoint is missing or does not match; never runs with random weights
+    load_checkpoint_strict(model, model_path, device)
+    print(f"Loaded trained model weights from {model_path}.")
 
     # 4. Setup Monte Carlo Dropout
     model.eval()               
