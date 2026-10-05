@@ -114,7 +114,14 @@ def wrapped_pupil_rmse(a: torch.Tensor, b: torch.Tensor, mask: torch.Tensor) -> 
     return torch.angle(torch.exp(1j * (d - piston))).pow(2).mean(-1).sqrt()
 
 if __name__ == "__main__":
-    cfg = OpticsConfig()
+    import argparse
+    parser = argparse.ArgumentParser(description="Classical multi-plane phase retrieval demo")
+    parser.add_argument('--diversity', type=str, default=None,
+                        help="Comma-separated diversity defocus per plane (default: OpticsConfig)")
+    parser.add_argument('--out', type=str, default=None, help="Save the figure here instead of showing it")
+    args = parser.parse_args()
+    cfg = OpticsConfig() if args.diversity is None else \
+        OpticsConfig(diversity_defocus=tuple(float(d) for d in args.diversity.split(',')))
     true_phase, target_intensity, recovered_phase, loss_history = run_inverse_solver(cfg)
     mask = cfg.build_geometry(true_phase.device).mask
     rmse_truth = pupil_rmse(recovered_phase, true_phase, mask).item()
@@ -149,4 +156,8 @@ if __name__ == "__main__":
     axes[3].grid(True)
 
     plt.tight_layout()
-    plt.show()
+    if args.out:
+        plt.savefig(args.out, dpi=110, bbox_inches='tight')
+        print(f"Saved {args.out}")
+    else:
+        plt.show()
