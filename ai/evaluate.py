@@ -11,21 +11,30 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ai.dataset import PhaseRetrievalDataset
-from ai.unet import UNet
+from ai.checkpoint import load_model
 from physics.config import OpticsConfig
 from physics.zernike import noll_to_nm, get_noll_polynomial
 from physics.simulator import OpticalSystem, twin_phase
 from dataclasses import replace
 
-def load_checkpoint_strict(model: torch.nn.Module, path: str, device) -> None:
-    """Loads weights or raises. Never falls back to random weights."""
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Checkpoint not found: {path}")
-    state = torch.load(path, map_location=device, weights_only=True)
-    try:
-        model.load_state_dict(state, strict=True)
-    except RuntimeError as e:
-        raise RuntimeError(f"Checkpoint {path} does not match the model architecture:\n{e}") from e
+def even_mode_mask(noll_indices) -> np.ndarray:
+    """True for modes with even |m| (centrosymmetric, sign flips under the twin map)."""
+    return np.array([abs(noll_to_nm(int(j))[1]) % 2 == 0 for j in noll_indices])
+
+def make_coeff_projector(cfg: OpticsConfig):
+    """
+    Least-squares projection of pupil phases [B, N, N] (CPU) onto the cfg basis -> coefficients [B, M].
+    Fits [piston, basis] so piston-removed truth recovers its synthesis coefficients exactly.
+    """
+    geo = cfg.build_geometry()
+    pupil = geo.mask > 0.5
+    piston = get_noll_polynomial(1, geo.rho, geo.theta, geo.mask)
+    design = torch.cat([piston[pupil].unsqueeze(1), geo.basis[:, pupil].T], dim=1).double()
+    projector = torch.linalg.pinv(design)  # [1 + M, P]
+
+    def project(phases: torch.Tensor) -> torch.Tensor:
+        return (projector @ phases[:, pupil].T.double()).T[:, 1:].float()
+    return project
 
 def r2_score(pred: np.ndarray, true: np.ndarray) -> np.ndarray:
     """Per-column coefficient of determination over samples."""
@@ -67,38 +76,28 @@ def evaluate(
     checkpoint: str,
     num_samples: int = 1000,
     seed: int = 1234,
-    mode: str = 'hybrid',
     batch_size: int = 64,
-    out_dir: str = 'eval',
-    cfg: OpticsConfig = None
+    out_dir: str = 'eval'
 ):
     os.makedirs(out_dir, exist_ok=True)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    if cfg is None:
-        cfg = OpticsConfig()
-    model = UNet(cfg, out_channels=1, mode=mode).to(device)
-    load_checkpoint_strict(model, checkpoint, device)
-    model.eval()
-    print(f"Loaded {checkpoint} (mode={mode}) on {device}")
+    # Geometry, diversity planes and architecture all come from the checkpoint
+    model, cfg, ckpt = load_model(checkpoint, device)
+    mode = ckpt["model_kwargs"].get("mode", "hybrid")
+    print(f"Loaded {checkpoint} (mode={mode}, epoch {ckpt['epoch']}, val_loss {ckpt['val_loss']:.4f}) on {device}")
+    print(f"Config: K={cfg.K} planes {cfg.diversity_defocus}, pupil_radius={cfg.pupil_radius}, crop={cfg.crop_size}")
 
     random.seed(seed)
     torch.manual_seed(seed)
     dataset = PhaseRetrievalDataset(cfg, num_samples=num_samples, device=torch.device('cpu'), return_coeffs=True)
     noll = np.array(dataset.noll_indices)
-    is_even = np.array([abs(noll_to_nm(int(j))[1]) % 2 == 0 for j in noll])
+    is_even = even_mode_mask(noll)
     checks = self_check(dataset, is_even)
     print(f"Self-check passed: {checks}")
 
-    # Least-squares projection of a pupil phase onto [piston, basis]. Truth is piston-removed
-    # after synthesis, so including piston recovers the synthesis coefficients exactly.
     pupil = dataset.mask > 0.5
-    piston = get_noll_polynomial(1, dataset.rho, dataset.theta, dataset.mask)
-    design = torch.cat([piston[pupil].unsqueeze(1), dataset.basis[:, pupil].T], dim=1).double()
-    projector = torch.linalg.pinv(design)  # [1 + M, P]
-
-    def project(phases: torch.Tensor) -> torch.Tensor:
-        return (projector @ phases[:, pupil].T.double()).T[:, 1:].float()
+    project = make_coeff_projector(cfg)
 
     true_c, head_c, proj_c, truth_proj_c = [], [], [], []
     rmse_truth, rmse_twin, rms_true = [], [], []
@@ -208,7 +207,7 @@ def evaluate(
     for s in ('left', 'bottom'):
         ax.spines[s].set_color(muted)
     ax.tick_params(colors=muted)
-    ax.set_title(f"Per-mode coefficient R² — {os.path.basename(checkpoint)}, {num_samples} samples",
+    ax.set_title(f"Per-mode coefficient R² — {os.path.relpath(checkpoint)}, {num_samples} samples",
                  color=ink, loc='left')
     from matplotlib.patches import Patch
     ax.legend(handles=[
@@ -222,7 +221,7 @@ def evaluate(
     plt.close(fig)
 
     metrics = {
-        "checkpoint": checkpoint, "mode": mode, "num_samples": num_samples, "seed": seed,
+        "checkpoint": checkpoint, "mode": mode, "config": ckpt["config"], "num_samples": num_samples, "seed": seed,
         "self_check": checks,
         "noll": noll.tolist(), "is_even": is_even.tolist(),
         "r2_head": r2_head.tolist(), "r2_proj": r2_proj.tolist(), "r2_twin_aware": r2_twin_aware.tolist(),
@@ -240,16 +239,10 @@ def evaluate(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Per-mode and twin-image evaluation of a phase retrieval checkpoint")
-    parser.add_argument('--checkpoint', type=str, default='saved_models/unet_phase_retrieval_best.pth')
+    parser.add_argument('--checkpoint', type=str, default='saved_models/latest/best.pth')
     parser.add_argument('--num-samples', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=1234)
-    parser.add_argument('--mode', type=str, default='hybrid', choices=['hybrid', 'modal', 'unet'],
-                        help="Architecture mode the checkpoint was trained with (not stored in legacy checkpoints)")
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--out-dir', type=str, default='eval')
-    parser.add_argument('--diversity', type=str, default=None,
-                        help="Comma-separated diversity defocus the checkpoint was trained with (default: OpticsConfig)")
     args = parser.parse_args()
-    cfg = OpticsConfig() if args.diversity is None else \
-        OpticsConfig(diversity_defocus=tuple(float(d) for d in args.diversity.split(',')))
-    evaluate(args.checkpoint, args.num_samples, args.seed, args.mode, args.batch_size, args.out_dir, cfg)
+    evaluate(args.checkpoint, args.num_samples, args.seed, args.batch_size, args.out_dir)

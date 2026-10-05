@@ -9,16 +9,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our custom modules
 from ai.dataset import PhaseRetrievalDataset
-from ai.unet import UNet
-from ai.evaluate import load_checkpoint_strict
-from physics.config import OpticsConfig
+from ai.checkpoint import load_model
 
-def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int = 50):
+def run_monte_carlo_inference(model_path: str, mc_passes: int = 50):
     # 1. Hardware Optimization: Utilize CUDA if available, fallback to MPS/CPU
     device = torch.device('cuda' if torch.cuda.is_available() else ('mps' if torch.backends.mps.is_available() else 'cpu'))
     print(f"Running Monte Carlo Inference on: {device}")
 
-    # 2. Initialize the dataset to generate a single unseen test sample
+    # 2. Rebuild the trained network from its checkpoint (geometry and diversity planes included).
+    # Raises if the checkpoint is missing or does not match; never runs with random weights
+    model, cfg, _ = load_model(model_path, device)
+    print(f"Loaded trained model weights from {model_path} (K={cfg.K} planes {cfg.diversity_defocus}).")
+
+    # 3. Initialize the dataset to generate a single unseen test sample
     test_dataset = PhaseRetrievalDataset(cfg, num_samples=1, device=device, return_coeffs=True)
     sample = test_dataset[0]
     intensity_input, true_phase = sample[0], sample[1]
@@ -26,13 +29,6 @@ def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int
     # Add the batch dimension [1, K, crop, crop] expected by the network
     intensity_input = intensity_input.unsqueeze(0).to(device)
     true_phase = true_phase.to(device)
-
-    # 3. Load the trained network
-    model = UNet(cfg, out_channels=1).to(device)
-
-    # Raises if the checkpoint is missing or does not match; never runs with random weights
-    load_checkpoint_strict(model, model_path, device)
-    print(f"Loaded trained model weights from {model_path}.")
 
     # 4. Setup Monte Carlo Dropout
     model.eval()               
@@ -52,14 +48,17 @@ def run_monte_carlo_inference(model_path: str, cfg: OpticsConfig, mc_passes: int
     mean_prediction = torch.mean(predictions_tensor, dim=0).squeeze()
     variance_map = torch.var(predictions_tensor, dim=0).squeeze()
     
-    return intensity_input[0], true_phase.squeeze(), mean_prediction, variance_map, test_dataset.mask.squeeze()
+    return intensity_input[0], true_phase.squeeze(), mean_prediction, variance_map, test_dataset.mask.squeeze(), cfg
 
 if __name__ == "__main__":
-    model_path = 'saved_models/unet_phase_retrieval_best.pth'
-    cfg = OpticsConfig()
-    
-    # Unpack the 5 variables, including the mask
-    intensity, truth, mean_pred, uncertainty, mask = run_monte_carlo_inference(model_path, cfg, mc_passes=50)
+    import argparse
+    parser = argparse.ArgumentParser(description="Monte Carlo dropout inference on one fresh synthetic sample")
+    parser.add_argument('--checkpoint', type=str, default='saved_models/latest/best.pth')
+    parser.add_argument('--mc-passes', type=int, default=50)
+    args = parser.parse_args()
+
+    # Unpack the outputs, including the mask and the checkpoint's config
+    intensity, truth, mean_pred, uncertainty, mask, cfg = run_monte_carlo_inference(args.checkpoint, mc_passes=args.mc_passes)
     
     # Move tensors to CPU and convert to NumPy for Matplotlib
     intensity = np.concatenate(list(intensity.cpu().numpy()), axis=1)  # diversity planes tiled left to right
