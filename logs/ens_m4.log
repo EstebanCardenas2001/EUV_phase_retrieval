@@ -1,0 +1,140 @@
+=================================================================
+Initializing EUV Phase Retrieval End-to-End Training (Pure FP32) on: cuda
+Device Name: Tesla T4
+VRAM Available: 15.64 GB
+Total Epochs: 100 | Batch Size: 32 | Samples/Epoch: 2048
+Optics: N=256, L=0.01, pupil_radius=0.0024 (footprint 123 px, Q=2.08), noise_rel=1.21e-06
+Phase diversity: K=3 planes at defocus (-1.0, 0.0, 1.0) rad RMS
+Noise augmentation: log-uniform x1..x30
+Intensity Crop: 128x128 (Preserving outer diffraction rings)
+Precision: Pure FP32 (Full IEEE-754 precision, no AMP/FP16)
+Architecture Mode: hybrid | Coeff Loss: sum over modes x 1.0
+Initial Learning Rate: 3.00e-04 | Scheduler: cosine (min LR 1.0e-06) | Seed: 4
+Validation: 512 fixed samples (seed 12345) | per-mode R2 every 10 epochs
+Checkpoints: saved_models/ens/m4/best.pth (lowest val loss), saved_models/ens/m4/final.pth
+=================================================================
+Generating fixed validation set...
+Verified all model parameters are trainable: 8,338,074 / 8,338,074 (requires_grad = True).
+Modal head parameters: 166,675 (trainable: True)
+==> Epoch 001/100 | Train: 2.8619 (phase 1.3734, coeff 1.4785, bg 0.1000) | Val: 2.5918 (phase 1.2098, coeff 1.3559) | LR: 3.00e-04
+==> Epoch 002/100 | Train: 2.1229 (phase 0.9396, coeff 1.1699, bg 0.1348) | Val: 2.7407 (phase 1.3391, coeff 1.3763) | LR: 3.00e-04
+==> Epoch 003/100 | Train: 1.7766 (phase 0.6928, coeff 1.0705, bg 0.1327) | Val: 2.6164 (phase 1.1759, coeff 1.3995) | LR: 3.00e-04
+==> Epoch 004/100 | Train: 1.6307 (phase 0.5505, coeff 1.0707, bg 0.0954) | Val: 1.5648 (phase 0.4944, coeff 1.0629) | LR: 2.99e-04
+==> Epoch 005/100 | Train: 1.4684 (phase 0.4253, coeff 1.0345, bg 0.0868) | Val: 2.5867 (phase 0.6781, coeff 1.8940) | LR: 2.99e-04
+==> Epoch 006/100 | Train: 1.3366 (phase 0.3449, coeff 0.9841, bg 0.0761) | Val: 1.5011 (phase 0.5767, coeff 0.9142) | LR: 2.98e-04
+==> Epoch 007/100 | Train: 1.0960 (phase 0.3286, coeff 0.7623, bg 0.0509) | Val: 1.5119 (phase 0.6488, coeff 0.8597) | LR: 2.97e-04
+==> Epoch 008/100 | Train: 0.8319 (phase 0.3252, coeff 0.5039, bg 0.0277) | Val: 1.6373 (phase 0.7628, coeff 0.8726) | LR: 2.96e-04
+==> Epoch 009/100 | Train: 0.7239 (phase 0.3035, coeff 0.4182, bg 0.0227) | Val: 0.9930 (phase 0.4128, coeff 0.5788) | LR: 2.95e-04
+==> Epoch 010/100 | Train: 0.6825 (phase 0.2934, coeff 0.3871, bg 0.0197) | Val: 1.2135 (phase 0.5066, coeff 0.7054) | LR: 2.94e-04
+    Val R2 (projected): odd 0.498 | even 0.565 | worst Noll 13 = 0.119 | head mean 0.224
+    per mode: 4:0.57 5:0.87 6:0.77 7:0.91 8:0.93 9:0.22 10:0.15 11:0.74 12:0.14 13:0.12 14:0.64 15:0.63 16:0.22 17:0.28 18:0.41 19:0.43 20:0.76 21:0.68 22:0.60
+==> Epoch 011/100 | Train: 0.6166 (phase 0.2577, coeff 0.3568, bg 0.0207) | Val: 1.5824 (phase 0.7548, coeff 0.8255) | LR: 2.93e-04
+==> Epoch 012/100 | Train: 0.5905 (phase 0.2478, coeff 0.3406, bg 0.0204) | Val: 0.7437 (phase 0.3212, coeff 0.4199) | LR: 2.91e-04
+==> Epoch 013/100 | Train: 0.5642 (phase 0.2347, coeff 0.3275, bg 0.0199) | Val: 1.1312 (phase 0.4788, coeff 0.6516) | LR: 2.90e-04
+==> Epoch 014/100 | Train: 0.5571 (phase 0.2308, coeff 0.3244, bg 0.0193) | Val: 2.9489 (phase 1.4245, coeff 1.5219) | LR: 2.88e-04
+==> Epoch 015/100 | Train: 0.5378 (phase 0.2189, coeff 0.3168, bg 0.0215) | Val: 1.9279 (phase 0.9096, coeff 1.0163) | LR: 2.86e-04
+==> Epoch 016/100 | Train: 0.5186 (phase 0.2121, coeff 0.3045, bg 0.0199) | Val: 2.2694 (phase 0.9842, coeff 1.2822) | LR: 2.84e-04
+==> Epoch 017/100 | Train: 0.5231 (phase 0.2130, coeff 0.3082, bg 0.0195) | Val: 0.5976 (phase 0.2895, coeff 0.3051) | LR: 2.82e-04
+==> Epoch 018/100 | Train: 0.4854 (phase 0.1925, coeff 0.2911, bg 0.0182) | Val: 0.6785 (phase 0.2843, coeff 0.3932) | LR: 2.79e-04
+==> Epoch 019/100 | Train: 0.4717 (phase 0.1847, coeff 0.2851, bg 0.0189) | Val: 0.6684 (phase 0.2882, coeff 0.3786) | LR: 2.77e-04
+==> Epoch 020/100 | Train: 0.4748 (phase 0.1871, coeff 0.2858, bg 0.0186) | Val: 0.9091 (phase 0.4289, coeff 0.4785) | LR: 2.74e-04
+    Val R2 (projected): odd 0.669 | even 0.702 | worst Noll 13 = 0.460 | head mean 0.270
+    per mode: 4:0.48 5:0.93 6:0.82 7:0.97 8:0.74 9:0.52 10:0.48 11:0.95 12:0.50 13:0.46 14:0.79 15:0.76 16:0.57 17:0.55 18:0.61 19:0.64 20:0.81 21:0.80 22:0.63
+==> Epoch 021/100 | Train: 0.4632 (phase 0.1798, coeff 0.2816, bg 0.0182) | Val: 0.7548 (phase 0.3393, coeff 0.4133) | LR: 2.71e-04
+==> Epoch 022/100 | Train: 0.4509 (phase 0.1727, coeff 0.2763, bg 0.0186) | Val: 0.3684 (phase 0.1267, coeff 0.2403) | LR: 2.69e-04
+==> Epoch 023/100 | Train: 0.4329 (phase 0.1608, coeff 0.2704, bg 0.0173) | Val: 0.6970 (phase 0.2875, coeff 0.4083) | LR: 2.66e-04
+==> Epoch 024/100 | Train: 0.4337 (phase 0.1619, coeff 0.2701, bg 0.0173) | Val: 0.9138 (phase 0.4115, coeff 0.5009) | LR: 2.63e-04
+==> Epoch 025/100 | Train: 0.4346 (phase 0.1608, coeff 0.2721, bg 0.0174) | Val: 0.3406 (phase 0.1193, coeff 0.2197) | LR: 2.59e-04
+==> Epoch 026/100 | Train: 0.4177 (phase 0.1514, coeff 0.2646, bg 0.0168) | Val: 0.7680 (phase 0.3169, coeff 0.4497) | LR: 2.56e-04
+==> Epoch 027/100 | Train: 0.4169 (phase 0.1501, coeff 0.2651, bg 0.0169) | Val: 0.4182 (phase 0.1619, coeff 0.2548) | LR: 2.53e-04
+==> Epoch 028/100 | Train: 0.4125 (phase 0.1494, coeff 0.2613, bg 0.0172) | Val: 0.3525 (phase 0.1217, coeff 0.2295) | LR: 2.49e-04
+==> Epoch 029/100 | Train: 0.3942 (phase 0.1387, coeff 0.2539, bg 0.0161) | Val: 0.4260 (phase 0.1542, coeff 0.2703) | LR: 2.46e-04
+==> Epoch 030/100 | Train: 0.3937 (phase 0.1360, coeff 0.2561, bg 0.0161) | Val: 0.4286 (phase 0.1427, coeff 0.2848) | LR: 2.42e-04
+    Val R2 (projected): odd 0.824 | even 0.854 | worst Noll 13 = 0.644 | head mean 0.315
+    per mode: 4:0.96 5:0.95 6:0.97 7:0.77 8:0.96 9:0.73 10:0.73 11:0.95 12:0.67 13:0.64 14:0.85 15:0.86 16:0.76 17:0.76 18:0.83 19:0.84 20:0.93 21:0.93 22:0.84
+==> Epoch 031/100 | Train: 0.3816 (phase 0.1318, coeff 0.2481, bg 0.0161) | Val: 0.4965 (phase 0.2186, coeff 0.2764) | LR: 2.38e-04
+==> Epoch 032/100 | Train: 0.3882 (phase 0.1321, coeff 0.2545, bg 0.0158) | Val: 0.6989 (phase 0.3691, coeff 0.3280) | LR: 2.35e-04
+==> Epoch 033/100 | Train: 0.3801 (phase 0.1284, coeff 0.2503, bg 0.0147) | Val: 0.4547 (phase 0.1681, coeff 0.2845) | LR: 2.31e-04
+==> Epoch 034/100 | Train: 0.3700 (phase 0.1228, coeff 0.2456, bg 0.0154) | Val: 0.3641 (phase 0.1353, coeff 0.2272) | LR: 2.27e-04
+==> Epoch 035/100 | Train: 0.3542 (phase 0.1126, coeff 0.2400, bg 0.0156) | Val: 0.3686 (phase 0.1210, coeff 0.2463) | LR: 2.23e-04
+==> Epoch 036/100 | Train: 0.3559 (phase 0.1118, coeff 0.2426, bg 0.0145) | Val: 0.2786 (phase 0.0839, coeff 0.1930) | LR: 2.18e-04
+==> Epoch 037/100 | Train: 0.3498 (phase 0.1111, coeff 0.2373, bg 0.0147) | Val: 0.3415 (phase 0.1193, coeff 0.2206) | LR: 2.14e-04
+==> Epoch 038/100 | Train: 0.3401 (phase 0.1044, coeff 0.2343, bg 0.0144) | Val: 0.4524 (phase 0.1652, coeff 0.2854) | LR: 2.10e-04
+==> Epoch 039/100 | Train: 0.3351 (phase 0.1029, coeff 0.2308, bg 0.0143) | Val: 0.3400 (phase 0.1063, coeff 0.2318) | LR: 2.06e-04
+==> Epoch 040/100 | Train: 0.3372 (phase 0.1026, coeff 0.2332, bg 0.0142) | Val: 0.2912 (phase 0.0772, coeff 0.2125) | LR: 2.01e-04
+    Val R2 (projected): odd 0.901 | even 0.878 | worst Noll 13 = 0.736 | head mean 0.342
+    per mode: 4:0.98 5:0.96 6:0.96 7:0.98 8:0.98 9:0.80 10:0.80 11:0.97 12:0.74 13:0.74 14:0.85 15:0.85 16:0.86 17:0.88 18:0.91 19:0.91 20:0.95 21:0.95 22:0.85
+==> Epoch 041/100 | Train: 0.3280 (phase 0.0990, coeff 0.2277, bg 0.0140) | Val: 0.4361 (phase 0.1648, coeff 0.2697) | LR: 1.97e-04
+==> Epoch 042/100 | Train: 0.3245 (phase 0.0952, coeff 0.2279, bg 0.0136) | Val: 0.2689 (phase 0.0700, coeff 0.1976) | LR: 1.92e-04
+==> Epoch 043/100 | Train: 0.3153 (phase 0.0907, coeff 0.2232, bg 0.0138) | Val: 0.4050 (phase 0.1310, coeff 0.2729) | LR: 1.88e-04
+==> Epoch 044/100 | Train: 0.3121 (phase 0.0908, coeff 0.2200, bg 0.0126) | Val: 0.2666 (phase 0.0635, coeff 0.2018) | LR: 1.83e-04
+==> Epoch 045/100 | Train: 0.3154 (phase 0.0913, coeff 0.2228, bg 0.0130) | Val: 0.2771 (phase 0.0779, coeff 0.1981) | LR: 1.79e-04
+==> Epoch 046/100 | Train: 0.3157 (phase 0.0897, coeff 0.2247, bg 0.0132) | Val: 0.2990 (phase 0.0819, coeff 0.2161) | LR: 1.74e-04
+==> Epoch 047/100 | Train: 0.3149 (phase 0.0911, coeff 0.2225, bg 0.0127) | Val: 0.2552 (phase 0.0582, coeff 0.1958) | LR: 1.69e-04
+==> Epoch 048/100 | Train: 0.3076 (phase 0.0852, coeff 0.2211, bg 0.0121) | Val: 0.3040 (phase 0.1039, coeff 0.1987) | LR: 1.65e-04
+==> Epoch 049/100 | Train: 0.2879 (phase 0.0771, coeff 0.2097, bg 0.0118) | Val: 0.3031 (phase 0.0816, coeff 0.2202) | LR: 1.60e-04
+==> Epoch 050/100 | Train: 0.2891 (phase 0.0767, coeff 0.2112, bg 0.0113) | Val: 0.2928 (phase 0.0807, coeff 0.2108) | LR: 1.55e-04
+    Val R2 (projected): odd 0.928 | even 0.887 | worst Noll 13 = 0.802 | head mean 0.348
+    per mode: 4:0.98 5:0.92 6:0.92 7:0.99 8:0.97 9:0.87 10:0.86 11:0.99 12:0.82 13:0.80 14:0.86 15:0.87 16:0.92 17:0.93 18:0.91 19:0.93 20:0.95 21:0.95 22:0.82
+==> Epoch 051/100 | Train: 0.2844 (phase 0.0738, coeff 0.2095, bg 0.0110) | Val: 0.2792 (phase 0.0706, coeff 0.2076) | LR: 1.50e-04
+==> Epoch 052/100 | Train: 0.2896 (phase 0.0745, coeff 0.2139, bg 0.0116) | Val: 0.2586 (phase 0.0689, coeff 0.1887) | LR: 1.46e-04
+==> Epoch 053/100 | Train: 0.2810 (phase 0.0709, coeff 0.2090, bg 0.0113) | Val: 0.2537 (phase 0.0639, coeff 0.1886) | LR: 1.41e-04
+==> Epoch 054/100 | Train: 0.2772 (phase 0.0693, coeff 0.2068, bg 0.0109) | Val: 0.2325 (phase 0.0443, coeff 0.1871) | LR: 1.36e-04
+==> Epoch 055/100 | Train: 0.2749 (phase 0.0691, coeff 0.2047, bg 0.0107) | Val: 0.2785 (phase 0.0814, coeff 0.1958) | LR: 1.32e-04
+==> Epoch 056/100 | Train: 0.2660 (phase 0.0644, coeff 0.2006, bg 0.0105) | Val: 0.2215 (phase 0.0416, coeff 0.1790) | LR: 1.27e-04
+==> Epoch 057/100 | Train: 0.2684 (phase 0.0626, coeff 0.2048, bg 0.0102) | Val: 0.3031 (phase 0.0897, coeff 0.2123) | LR: 1.22e-04
+==> Epoch 058/100 | Train: 0.2730 (phase 0.0659, coeff 0.2061, bg 0.0100) | Val: 0.2272 (phase 0.0456, coeff 0.1806) | LR: 1.18e-04
+==> Epoch 059/100 | Train: 0.2679 (phase 0.0631, coeff 0.2037, bg 0.0103) | Val: 0.2984 (phase 0.0846, coeff 0.2129) | LR: 1.13e-04
+==> Epoch 060/100 | Train: 0.2567 (phase 0.0584, coeff 0.1973, bg 0.0101) | Val: 0.2163 (phase 0.0435, coeff 0.1718) | LR: 1.09e-04
+    Val R2 (projected): odd 0.940 | even 0.943 | worst Noll 12 = 0.877 | head mean 0.355
+    per mode: 4:0.99 5:0.98 6:0.97 7:0.98 8:0.98 9:0.90 10:0.88 11:0.99 12:0.88 13:0.89 14:0.92 15:0.93 16:0.92 17:0.94 18:0.94 19:0.95 20:0.96 21:0.96 22:0.94
+==> Epoch 061/100 | Train: 0.2574 (phase 0.0575, coeff 0.1990, bg 0.0095) | Val: 0.2166 (phase 0.0384, coeff 0.1774) | LR: 1.04e-04
+==> Epoch 062/100 | Train: 0.2576 (phase 0.0573, coeff 0.1994, bg 0.0095) | Val: 0.2322 (phase 0.0473, coeff 0.1838) | LR: 9.99e-05
+==> Epoch 063/100 | Train: 0.2489 (phase 0.0537, coeff 0.1943, bg 0.0091) | Val: 0.2229 (phase 0.0463, coeff 0.1755) | LR: 9.55e-05
+==> Epoch 064/100 | Train: 0.2553 (phase 0.0565, coeff 0.1979, bg 0.0091) | Val: 0.2132 (phase 0.0420, coeff 0.1701) | LR: 9.11e-05
+==> Epoch 065/100 | Train: 0.2474 (phase 0.0518, coeff 0.1948, bg 0.0088) | Val: 0.2481 (phase 0.0576, coeff 0.1897) | LR: 8.68e-05
+==> Epoch 066/100 | Train: 0.2499 (phase 0.0540, coeff 0.1950, bg 0.0088) | Val: 0.1968 (phase 0.0315, coeff 0.1645) | LR: 8.26e-05
+==> Epoch 067/100 | Train: 0.2480 (phase 0.0517, coeff 0.1954, bg 0.0087) | Val: 0.1931 (phase 0.0284, coeff 0.1639) | LR: 7.85e-05
+==> Epoch 068/100 | Train: 0.2435 (phase 0.0495, coeff 0.1932, bg 0.0085) | Val: 0.1951 (phase 0.0284, coeff 0.1659) | LR: 7.44e-05
+==> Epoch 069/100 | Train: 0.2441 (phase 0.0508, coeff 0.1925, bg 0.0082) | Val: 0.1998 (phase 0.0308, coeff 0.1683) | LR: 7.04e-05
+==> Epoch 070/100 | Train: 0.2405 (phase 0.0487, coeff 0.1910, bg 0.0083) | Val: 0.1926 (phase 0.0289, coeff 0.1630) | LR: 6.65e-05
+    Val R2 (projected): odd 0.956 | even 0.963 | worst Noll 10 = 0.910 | head mean 0.363
+    per mode: 4:0.99 5:0.99 6:0.98 7:0.99 8:0.99 9:0.92 10:0.91 11:1.00 12:0.92 13:0.93 14:0.94 15:0.95 16:0.94 17:0.96 18:0.95 19:0.96 20:0.97 21:0.97 22:0.96
+==> Epoch 071/100 | Train: 0.2378 (phase 0.0473, coeff 0.1897, bg 0.0080) | Val: 0.1847 (phase 0.0220, coeff 0.1619) | LR: 6.26e-05
+==> Epoch 072/100 | Train: 0.2406 (phase 0.0488, coeff 0.1910, bg 0.0081) | Val: 0.2026 (phase 0.0356, coeff 0.1662) | LR: 5.89e-05
+==> Epoch 073/100 | Train: 0.2384 (phase 0.0473, coeff 0.1903, bg 0.0081) | Val: 0.1925 (phase 0.0279, coeff 0.1639) | LR: 5.52e-05
+==> Epoch 074/100 | Train: 0.2347 (phase 0.0453, coeff 0.1886, bg 0.0078) | Val: 0.1912 (phase 0.0257, coeff 0.1647) | LR: 5.16e-05
+==> Epoch 075/100 | Train: 0.2333 (phase 0.0445, coeff 0.1880, bg 0.0078) | Val: 0.1850 (phase 0.0228, coeff 0.1615) | LR: 4.82e-05
+==> Epoch 076/100 | Train: 0.2335 (phase 0.0449, coeff 0.1879, bg 0.0076) | Val: 0.1883 (phase 0.0232, coeff 0.1643) | LR: 4.48e-05
+==> Epoch 077/100 | Train: 0.2307 (phase 0.0434, coeff 0.1865, bg 0.0077) | Val: 0.1947 (phase 0.0293, coeff 0.1647) | LR: 4.15e-05
+==> Epoch 078/100 | Train: 0.2338 (phase 0.0438, coeff 0.1892, bg 0.0077) | Val: 0.1854 (phase 0.0227, coeff 0.1619) | LR: 3.84e-05
+==> Epoch 079/100 | Train: 0.2291 (phase 0.0426, coeff 0.1858, bg 0.0073) | Val: 0.1837 (phase 0.0230, coeff 0.1600) | LR: 3.53e-05
+==> Epoch 080/100 | Train: 0.2286 (phase 0.0420, coeff 0.1858, bg 0.0074) | Val: 0.1826 (phase 0.0208, coeff 0.1612) | LR: 3.24e-05
+    Val R2 (projected): odd 0.962 | even 0.967 | worst Noll 9 = 0.927 | head mean 0.366
+    per mode: 4:1.00 5:0.99 6:0.99 7:0.99 8:0.99 9:0.93 10:0.93 11:0.99 12:0.93 13:0.94 14:0.95 15:0.95 16:0.95 17:0.96 18:0.96 19:0.96 20:0.97 21:0.97 22:0.95
+==> Epoch 081/100 | Train: 0.2265 (phase 0.0410, coeff 0.1847, bg 0.0074) | Val: 0.1800 (phase 0.0193, coeff 0.1600) | LR: 2.96e-05
+==> Epoch 082/100 | Train: 0.2258 (phase 0.0409, coeff 0.1842, bg 0.0073) | Val: 0.1777 (phase 0.0185, coeff 0.1585) | LR: 2.69e-05
+==> Epoch 083/100 | Train: 0.2283 (phase 0.0407, coeff 0.1869, bg 0.0074) | Val: 0.1807 (phase 0.0191, coeff 0.1610) | LR: 2.43e-05
+==> Epoch 084/100 | Train: 0.2247 (phase 0.0392, coeff 0.1847, bg 0.0073) | Val: 0.1813 (phase 0.0198, coeff 0.1607) | LR: 2.18e-05
+==> Epoch 085/100 | Train: 0.2254 (phase 0.0394, coeff 0.1853, bg 0.0071) | Val: 0.1770 (phase 0.0186, coeff 0.1576) | LR: 1.95e-05
+==> Epoch 086/100 | Train: 0.2256 (phase 0.0401, coeff 0.1848, bg 0.0074) | Val: 0.1764 (phase 0.0182, coeff 0.1575) | LR: 1.73e-05
+==> Epoch 087/100 | Train: 0.2270 (phase 0.0398, coeff 0.1864, bg 0.0072) | Val: 0.1802 (phase 0.0187, coeff 0.1608) | LR: 1.52e-05
+==> Epoch 088/100 | Train: 0.2235 (phase 0.0390, coeff 0.1838, bg 0.0070) | Val: 0.1748 (phase 0.0171, coeff 0.1570) | LR: 1.33e-05
+==> Epoch 089/100 | Train: 0.2226 (phase 0.0377, coeff 0.1842, bg 0.0071) | Val: 0.1759 (phase 0.0181, coeff 0.1571) | LR: 1.15e-05
+==> Epoch 090/100 | Train: 0.2218 (phase 0.0378, coeff 0.1833, bg 0.0068) | Val: 0.1756 (phase 0.0169, coeff 0.1580) | LR: 9.84e-06
+    Val R2 (projected): odd 0.965 | even 0.973 | worst Noll 9 = 0.932 | head mean 0.368
+    per mode: 4:1.00 5:1.00 6:0.99 7:0.99 8:0.99 9:0.93 10:0.93 11:1.00 12:0.94 13:0.95 14:0.95 15:0.95 16:0.96 17:0.97 18:0.96 19:0.97 20:0.98 21:0.97 22:0.98
+==> Epoch 091/100 | Train: 0.2209 (phase 0.0373, coeff 0.1829, bg 0.0071) | Val: 0.1746 (phase 0.0169, coeff 0.1570) | LR: 8.32e-06
+==> Epoch 092/100 | Train: 0.2228 (phase 0.0380, coeff 0.1841, bg 0.0071) | Val: 0.1740 (phase 0.0165, coeff 0.1568) | LR: 6.94e-06
+==> Epoch 093/100 | Train: 0.2198 (phase 0.0368, coeff 0.1823, bg 0.0069) | Val: 0.1740 (phase 0.0163, coeff 0.1571) | LR: 5.70e-06
+==> Epoch 094/100 | Train: 0.2209 (phase 0.0369, coeff 0.1834, bg 0.0068) | Val: 0.1738 (phase 0.0161, coeff 0.1571) | LR: 4.60e-06
+==> Epoch 095/100 | Train: 0.2210 (phase 0.0375, coeff 0.1828, bg 0.0069) | Val: 0.1735 (phase 0.0162, coeff 0.1567) | LR: 3.65e-06
+==> Epoch 096/100 | Train: 0.2234 (phase 0.0382, coeff 0.1845, bg 0.0070) | Val: 0.1730 (phase 0.0160, coeff 0.1564) | LR: 2.84e-06
+==> Epoch 097/100 | Train: 0.2218 (phase 0.0367, coeff 0.1843, bg 0.0071) | Val: 0.1736 (phase 0.0160, coeff 0.1569) | LR: 2.18e-06
+==> Epoch 098/100 | Train: 0.2213 (phase 0.0375, coeff 0.1831, bg 0.0069) | Val: 0.1734 (phase 0.0158, coeff 0.1569) | LR: 1.66e-06
+==> Epoch 099/100 | Train: 0.2217 (phase 0.0378, coeff 0.1833, bg 0.0069) | Val: 0.1732 (phase 0.0158, coeff 0.1568) | LR: 1.30e-06
+==> Epoch 100/100 | Train: 0.2215 (phase 0.0371, coeff 0.1836, bg 0.0069) | Val: 0.1730 (phase 0.0157, coeff 0.1566) | LR: 1.07e-06
+    Val R2 (projected): odd 0.966 | even 0.973 | worst Noll 10 = 0.935 | head mean 0.368
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.94 10:0.93 11:1.00 12:0.94 13:0.95 14:0.95 15:0.95 16:0.96 17:0.97 18:0.96 19:0.97 20:0.98 21:0.97 22:0.98
+
+Pure FP32 training complete. Best validation loss: 0.173033 -> saved_models/ens/m4/best.pth

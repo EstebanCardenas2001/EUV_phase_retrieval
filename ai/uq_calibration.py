@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator, FormatStrFormatter, NullFormatter
 import argparse
 import json
 import math
@@ -88,9 +89,19 @@ def calibration_metrics(e: np.ndarray, s: np.ndarray, scale: float = 1.0, bins: 
     }
 
 def fit_scale(e: np.ndarray, s: np.ndarray) -> float:
-    """Post-hoc variance scaling: the single factor that makes the z-scores have unit RMS."""
-    s = np.maximum(s.ravel().astype(np.float64), SIGMA_FLOOR)
-    return float(np.sqrt(np.mean((e.ravel() / s) ** 2)))
+    """
+    Post-hoc variance scaling: the single factor that puts 68.3 % of |z| within 1 (median |z| / 0.6745).
+    A unit-RMS fit is not robust: with a small ensemble, sigma is a sample std over M members, so
+    z follows a Student-t with M - 1 dof, whose variance is infinite for M = 3 and dominated by the
+    few pixels where the members happen to agree.
+    """
+    z = e.ravel() / np.maximum(s.ravel().astype(np.float64), SIGMA_FLOOR)
+    return float(np.median(np.abs(z)) / 0.6744897501960817)
+
+def fit_scale_rms(e: np.ndarray, s: np.ndarray) -> float:
+    """Unit-RMS z-score scale; reported for reference only (see fit_scale)."""
+    z = e.ravel() / np.maximum(s.ravel().astype(np.float64), SIGMA_FLOOR)
+    return float(np.sqrt(np.mean(z ** 2)))
 
 def make_set(cfg, seed, coeff_scale=1.0, noise_mult=None):
     """
@@ -132,9 +143,12 @@ def run(checkpoint, num_samples: int = 1000, ood_samples: int = 500, mc_passes: 
 
     val = raw["val (fit scale)"]
     scales = {"pixel": fit_scale(val["e_pix"], val["s_pix"]), "coeff": fit_scale(val["e_coef"], val["s_coef"])}
-    print(f"Variance scale fitted on validation: pixel x{scales['pixel']:.2f}, coeff x{scales['coeff']:.2f}\n")
+    scales_rms = {"pixel": fit_scale_rms(val["e_pix"], val["s_pix"]), "coeff": fit_scale_rms(val["e_coef"], val["s_coef"])}
+    print(f"Variance scale fitted on validation (median |z|): pixel x{scales['pixel']:.2f}, coeff x{scales['coeff']:.2f} "
+          f"(unit-RMS fit, reference only: x{scales_rms['pixel']:.2f}, x{scales_rms['coeff']:.2f})\n")
 
-    results = {"checkpoint": checkpoints, "mc_passes": mc_passes, "scales": scales, "sets": {}}
+    results = {"checkpoint": checkpoints, "mc_passes": mc_passes, "scales": scales, "scales_rms": scales_rms,
+               "sets": {}}
     header = (f"{'set':>16} {'level':>6} | {'RMSE':>6} {'RMS sigma':>9} | {'cov 1s':>6} {'cov 2s':>6} "
               f"{'z RMS':>6} {'NLL':>7} | scaled: {'cov 1s':>6} {'cov 2s':>6} {'NLL':>7}")
     print(header)
@@ -186,6 +200,11 @@ def plot(results, test_raw, scales, path):
         ax.plot([lo, hi], [lo, hi], color=muted, linewidth=1, linestyle=':', label='ideal (y = x)')
         ax.set_xscale('log')
         ax.set_yscale('log')
+        # 1-2-5 ticks with plain labels; default minor labels collide on narrow log ranges
+        for axis in (ax.xaxis, ax.yaxis):
+            axis.set_major_locator(LogLocator(base=10, subs=(1.0, 2.0, 5.0)))
+            axis.set_major_formatter(FormatStrFormatter('%g'))
+            axis.set_minor_formatter(NullFormatter())
         ax.set_xlabel('predicted sigma (RMS within bin) [rad]', color=muted)
         ax.set_ylabel('actual RMSE within bin [rad]', color=muted)
         ax.set_title(title, color=ink, loc='left', fontsize=11)
