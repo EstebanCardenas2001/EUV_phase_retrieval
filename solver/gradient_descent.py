@@ -23,19 +23,23 @@ def total_variation_loss(img: torch.Tensor):
     return tv_h + tv_w
 
 def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterations: int = 300,
-                lr: float = 0.1, lambda_tv: float = 0.05, verbose: bool = True):
+                lr: float = 0.1, lambda_tv: float = 0.05, verbose: bool = True, init_phase: torch.Tensor = None):
     """
     Pixelwise gradient-descent phase retrieval fitting all K diversity planes jointly.
 
     Args:
         target_intensity: Measured stack [..., K, N, N]; leading dims are independent problems.
+        init_phase: Optional starting phase [..., N, N] (e.g. a network prediction); zeros if None.
     Returns:
         (recovered phase [..., N, N], loss history)
     """
-    # We start with a completely flat, un-aberrated wavefront (all zeros).
+    # By default we start with a completely flat, un-aberrated wavefront (all zeros).
     # requires_grad=True is the magic that tells PyTorch to calculate derivatives for this tensor.
-    predicted_phase = torch.zeros(target_intensity.shape[:-3] + target_intensity.shape[-2:],
-                                  requires_grad=True, device=target_intensity.device)
+    if init_phase is None:
+        predicted_phase = torch.zeros(target_intensity.shape[:-3] + target_intensity.shape[-2:],
+                                      requires_grad=True, device=target_intensity.device)
+    else:
+        predicted_phase = (init_phase.detach().clone() * simulator.mask).requires_grad_(True)
 
     # We use the Adam optimizer. A learning rate of 0.1 is aggressive but works well for phase retrieval.
     # Adam's per-parameter scaling keeps batched problems independent of the batch size.
