@@ -8,3 +8,10 @@ __pycache__/
 *.pth
 *.pt
 training_progress/
+
+# Large artifacts that must never be committed (release assets live in GitHub Releases)
+*.ckpt
+*.safetensors
+*.npy
+*.npz
+*.zip
