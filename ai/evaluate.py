@@ -18,6 +18,19 @@ from physics.zernike import noll_to_nm, get_noll_polynomial
 from physics.simulator import OpticalSystem, twin_phase
 from dataclasses import replace
 
+# Physical units for reporting only (the simulation itself is dimensionless in phase): EUV at 13.5 nm.
+# Wavefront error [nm] = phase [rad] * lambda / (2 pi). Kept out of OpticsConfig so old checkpoints
+# are unaffected and the wavelength can be changed here without retraining.
+WAVELENGTH_NM = 13.5
+MARECHAL_RMS_RAD = 2 * np.pi / 14  # lambda/14 RMS wavefront error, Strehl ~0.8 ("diffraction limited")
+
+def rad_to_nm(phase_rad):
+    return phase_rad * WAVELENGTH_NM / (2 * np.pi)
+
+def marechal_strehl(rms_rad):
+    """Marechal approximation S ~ exp(-sigma^2), sigma = piston-removed RMS phase error [rad]; valid for small sigma."""
+    return np.exp(-np.asarray(rms_rad) ** 2)
+
 def even_mode_mask(noll_indices) -> np.ndarray:
     """True for modes with even |m| (centrosymmetric, sign flips under the twin map)."""
     return np.array([abs(noll_to_nm(int(j))[1]) % 2 == 0 for j in noll_indices])
@@ -117,7 +130,7 @@ def evaluate(
     project = make_coeff_projector(cfg)
 
     true_c, head_c, proj_c, truth_proj_c = [], [], [], []
-    rmse_truth, rmse_twin, rms_true = [], [], []
+    rmse_truth, rmse_twin, rms_true, rmse_residual = [], [], [], []
     rms_even_true, rms_even_pred, rmse_odd = [], [], []
 
     with torch.no_grad():
@@ -134,6 +147,9 @@ def evaluate(
             err_truth = (pred - truths)[:, pupil]
             err_twin = (pred - twins)[:, pupil]
             rmse_truth.append(err_truth.pow(2).mean(1).sqrt())
+            # Residual wavefront error after correcting with the prediction: piston removed (no optical effect)
+            err_pf = err_truth - err_truth.mean(1, keepdim=True)
+            rmse_residual.append(err_pf.pow(2).mean(1).sqrt())
             rmse_twin.append(err_twin.pow(2).mean(1).sqrt())
             rms_true.append(truths[:, pupil].pow(2).mean(1).sqrt())
 
@@ -154,7 +170,8 @@ def evaluate(
 
     cat = lambda xs: torch.cat(xs).numpy()
     true_c, head_c, proj_c, truth_proj_c = map(cat, (true_c, head_c, proj_c, truth_proj_c))
-    rmse_truth, rmse_twin, rms_true = map(cat, (rmse_truth, rmse_twin, rms_true))
+    rmse_truth, rmse_twin, rms_true, rmse_residual = map(cat, (rmse_truth, rmse_twin, rms_true, rmse_residual))
+    strehl = marechal_strehl(rmse_residual)
     rms_even_true, rms_even_pred, rmse_odd = map(cat, (rms_even_true, rms_even_pred, rmse_odd))
 
     proj_sanity = np.abs(truth_proj_c - true_c).max()
@@ -190,6 +207,13 @@ def evaluate(
     print(f"  vs twin -phi(-r):    {np.median(rmse_twin):.3f} / {rmse_twin.mean():.3f}")
     print(f"  flat-prediction ref: {np.median(rms_true):.3f} / {rms_true.mean():.3f}  (RMS of true phase)")
     print(f"  min(truth, twin):    {np.median(np.minimum(rmse_truth, rmse_twin)):.3f}")
+    print(f"\nResidual wavefront error after correction (piston removed), lambda = {WAVELENGTH_NM} nm")
+    print(f"  RMS: median {np.median(rmse_residual):.4f} rad = {rad_to_nm(np.median(rmse_residual)):.4f} nm | "
+          f"mean {rmse_residual.mean():.4f} rad = {rad_to_nm(rmse_residual.mean()):.4f} nm")
+    print(f"  Marechal Strehl exp(-sigma^2): median {np.median(strehl):.4f} | mean {strehl.mean():.4f} | "
+          f"within lambda/14 ({rad_to_nm(MARECHAL_RMS_RAD):.3f} nm): {np.mean(rmse_residual <= MARECHAL_RMS_RAD):.1%}")
+    print(f"  (true aberration before correction: median {np.median(rms_true):.3f} rad = "
+          f"{rad_to_nm(np.median(rms_true)):.3f} nm RMS)")
     print(f"Twin closer than truth: {twin_closer.mean():.1%} of samples "
           f"({(twin_closer & (margin > 0.1)).mean():.1%} by >10% margin; "
           f"truth closer by >10%: {(~twin_closer & (margin > 0.1)).mean():.1%})")
@@ -246,6 +270,16 @@ def evaluate(
         "phase_rmse_truth_median": float(np.median(rmse_truth)),
         "phase_rmse_twin_median": float(np.median(rmse_twin)),
         "true_phase_rms_median": float(np.median(rms_true)),
+        "wavelength_nm": WAVELENGTH_NM,
+        "phase_rmse_truth_median_nm": float(rad_to_nm(np.median(rmse_truth))),
+        "true_phase_rms_median_nm": float(rad_to_nm(np.median(rms_true))),
+        "residual_rmse_rad_median": float(np.median(rmse_residual)),
+        "residual_rmse_rad_mean": float(rmse_residual.mean()),
+        "residual_rmse_nm_median": float(rad_to_nm(np.median(rmse_residual))),
+        "residual_rmse_nm_mean": float(rad_to_nm(rmse_residual.mean())),
+        "strehl_marechal_median": float(np.median(strehl)),
+        "strehl_marechal_mean": float(strehl.mean()),
+        "fraction_within_marechal_criterion": float(np.mean(rmse_residual <= MARECHAL_RMS_RAD)),
         "twin_closer_fraction": float(twin_closer.mean()),
         "even_rms_ratio_median": float(np.median(rms_even_pred / rms_even_true)),
     }
