@@ -83,7 +83,7 @@ def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterat
 
         # Apply the mask to the predicted phase to keep it clean outside the lens
         with torch.no_grad():
-            predicted_phase.data *= simulator.mask
+            predicted_phase.mul_(simulator.mask)
 
         loss_history.append(loss.item())
         if verbose and (i + 1) % 50 == 0:
