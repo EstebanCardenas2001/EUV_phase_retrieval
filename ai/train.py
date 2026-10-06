@@ -55,6 +55,13 @@ def make_validation_set(cfg: OpticsConfig, num_samples: int = 512, seed: int = 1
     """
     Generates a fixed validation set once, with its own seed. The global RNG state is restored
     afterwards so the validation set does not change the training sample stream.
+
+    The set follows the training distribution, including noise augmentation: with
+    cfg.noise_aug_max > 1 each validation sample has its own noise level (log-uniform in
+    [1, noise_aug_max] x nominal). Validation losses of augmented runs are therefore not comparable
+    with those of fixed-noise runs, nor with evaluate.py / uq_calibration.py, which test at fixed
+    noise levels (--noise-mult). This is intentional: checkpoint selection should reflect the noise
+    range the model is trained for.
     """
     py_state, torch_state = random.getstate(), torch.get_rng_state()
     random.seed(seed)
