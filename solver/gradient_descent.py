@@ -16,15 +16,22 @@ from physics.zernike import zernike_polynomial
 # physical intensity level (unaberrated peak ~2e3), keeps the amplitude-loss gradient finite.
 SQRT_EPS = 1e-12
 
-def total_variation_loss(img: torch.Tensor):
+def total_variation_loss(img: torch.Tensor, mask: torch.Tensor = None):
     """
     Calculates the Total Variation (TV) over the last two dims to penalize high-frequency noise.
+
+    With mask [N, N], only neighbour pairs with both pixels inside the pupil count, averaged over the
+    valid pairs. Without it, every pair on the grid counts, which also penalizes the phase step at the
+    aperture edge and biases the rim phase toward zero.
     """
-    # Difference between adjacent rows (vertical edges)
-    tv_h = torch.mean(torch.abs(img[..., 1:, :] - img[..., :-1, :]))
-    # Difference between adjacent columns (horizontal edges)
-    tv_w = torch.mean(torch.abs(img[..., :, 1:] - img[..., :, :-1]))
-    return tv_h + tv_w
+    diff_h = torch.abs(img[..., 1:, :] - img[..., :-1, :])  # vertical neighbours
+    diff_w = torch.abs(img[..., :, 1:] - img[..., :, :-1])  # horizontal neighbours
+    if mask is None:
+        return diff_h.mean() + diff_w.mean()
+    inside = mask > 0.5
+    valid_h = inside[1:, :] & inside[:-1, :]
+    valid_w = inside[:, 1:] & inside[:, :-1]
+    return diff_h[..., valid_h].mean() + diff_w[..., valid_w].mean()
 
 def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterations: int = 300,
                 lr: float = 0.1, lambda_tv: float = 0.05, verbose: bool = True, init_phase: torch.Tensor = None):
@@ -61,7 +68,7 @@ def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterat
         loss_data = F.mse_loss(torch.sqrt(simulated_intensity + SQRT_EPS), target_amplitude)
 
         # 2. Regularization Loss (Physical Smoothness)
-        loss_tv = total_variation_loss(predicted_phase)
+        loss_tv = total_variation_loss(predicted_phase, simulator.mask)
 
         # 3. Total Loss
         # lambda_tv is the weight. Too high, and the phase becomes a flat plane.
