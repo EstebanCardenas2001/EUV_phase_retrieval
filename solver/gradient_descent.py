@@ -12,6 +12,10 @@ from physics.config import OpticsConfig
 from physics.simulator import OpticalSystem, twin_phase
 from physics.zernike import zernike_polynomial
 
+# d sqrt(I)/dI = 1 / (2 sqrt(I)) is infinite at I = 0 (dark fringes). A tiny offset, far below any
+# physical intensity level (unaberrated peak ~2e3), keeps the amplitude-loss gradient finite.
+SQRT_EPS = 1e-12
+
 def total_variation_loss(img: torch.Tensor):
     """
     Calculates the Total Variation (TV) over the last two dims to penalize high-frequency noise.
@@ -44,7 +48,7 @@ def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterat
     # We use the Adam optimizer. A learning rate of 0.1 is aggressive but works well for phase retrieval.
     # Adam's per-parameter scaling keeps batched problems independent of the batch size.
     optimizer = optim.Adam([predicted_phase], lr=lr)
-    target_amplitude = torch.sqrt(target_intensity)
+    target_amplitude = torch.sqrt(target_intensity + SQRT_EPS)
     loss_history = []
 
     for i in range(iterations):
@@ -54,7 +58,7 @@ def solve_phase(simulator: OpticalSystem, target_intensity: torch.Tensor, iterat
         simulated_intensity = simulator(predicted_phase)
 
         # 1. Data Loss (MSE on Amplitude), averaged over all planes
-        loss_data = F.mse_loss(torch.sqrt(simulated_intensity), target_amplitude)
+        loss_data = F.mse_loss(torch.sqrt(simulated_intensity + SQRT_EPS), target_amplitude)
 
         # 2. Regularization Loss (Physical Smoothness)
         loss_tv = total_variation_loss(predicted_phase)
