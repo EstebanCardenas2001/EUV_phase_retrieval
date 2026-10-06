@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import random
+import time
 import argparse
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -228,6 +229,7 @@ def train_model(
 
     for epoch in range(epochs):
         current_epoch = epoch + 1
+        t_epoch = time.perf_counter()
         model.train()
 
         # Guard: verify requires_grad remains True for all parameters
@@ -257,21 +259,25 @@ def train_model(
                 sums[k] += losses[k].item()
 
         train_avg = {k: v / num_batches for k, v in sums.items()}
+        t_train = time.perf_counter() - t_epoch
 
         # Validation (dropout off); per-mode R2 every r2_every epochs and at the end
         log_r2 = current_epoch % r2_every == 0 or current_epoch == epochs
         val_avg, r2 = validate(model, val_loader, static_mask_gpu, coeff_weight, device,
                                project if log_r2 else None)
         current_lr = optimizer.param_groups[0]['lr']
+        t_val = time.perf_counter() - t_epoch - t_train
 
         print(
             f"==> Epoch {current_epoch:03d}/{epochs} | "
             f"Train: {train_avg['total']:.4f} (phase {train_avg['phase']:.4f}, coeff {train_avg['coeff']:.4f}, "
             f"bg {train_avg['bg']:.4f}) | "
             f"Val: {val_avg['total']:.4f} (phase {val_avg['phase']:.4f}, coeff {val_avg['coeff']:.4f}) | "
-            f"LR: {current_lr:.2e}"
+            f"LR: {current_lr:.2e} | "
+            f"time {t_train:.0f}s train ({len(train_dataset) / t_train:.0f} samples/s) + {t_val:.0f}s val"
         )
-        record = {"epoch": current_epoch, "lr": current_lr, "train": train_avg, "val": val_avg}
+        record = {"epoch": current_epoch, "lr": current_lr, "train": train_avg, "val": val_avg,
+                  "train_seconds": t_train, "val_seconds": t_val}
         if r2 is not None:
             r2p = r2["r2_proj"]
             worst = int(np.argmin(r2p))
