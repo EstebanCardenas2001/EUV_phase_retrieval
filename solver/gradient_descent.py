@@ -142,9 +142,11 @@ if __name__ == "__main__":
         OpticsConfig(diversity_defocus=tuple(float(d) for d in args.diversity.split(',')))
     true_phase, target_intensity, recovered_phase, loss_history = run_inverse_solver(cfg)
     mask = cfg.build_geometry(true_phase.device).mask
-    rmse_truth = pupil_rmse(recovered_phase, true_phase, mask).item()
-    rmse_twin = pupil_rmse(recovered_phase, twin_phase(true_phase), mask).item()
-    print(f"RMSE vs truth: {rmse_truth:.3f} rad | vs twin -phi(-r): {rmse_twin:.3f} rad")
+    # Piston-free and modulo 2 pi: piston is unobservable and has no optical effect. Without the
+    # full-grid TV (which pinned it near zero via the aperture-edge step) the solver's piston is arbitrary.
+    rmse_truth = wrapped_pupil_rmse(recovered_phase, true_phase, mask).item()
+    rmse_twin = wrapped_pupil_rmse(recovered_phase, twin_phase(true_phase), mask).item()
+    print(f"RMSE vs truth: {rmse_truth:.3f} rad | vs twin -phi(-r): {rmse_twin:.3f} rad (piston-free, mod 2pi)")
 
     # 5. Visualize the Results
     fig, axes = plt.subplots(1, 4, figsize=(20, 4))
@@ -162,7 +164,9 @@ if __name__ == "__main__":
     axes[1].set_title(f"Sensor Target, defocus {cfg.diversity_defocus}")
     axes[1].axis('off')
 
-    c3 = axes[2].imshow(recovered_phase.cpu().numpy(), cmap='RdBu', extent=cfg.extent, vmin=-vlim, vmax=vlim)
+    # Remove the arbitrary piston for display so the map is comparable with the (piston-free) truth
+    shown = recovered_phase - recovered_phase[mask > 0.5].mean()
+    c3 = axes[2].imshow((shown * mask).cpu().numpy(), cmap='RdBu', extent=cfg.extent, vmin=-vlim, vmax=vlim)
     axes[2].set_title(f"Recovered (RMSE truth {rmse_truth:.2f} / twin {rmse_twin:.2f})")
     fig.colorbar(c3, ax=axes[2])
 
