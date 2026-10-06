@@ -5,7 +5,8 @@ def create_spatial_grid(N: int, L: float, device: torch.device = torch.device('c
     Generates a 2D spatial coordinate grid centered at zero.
     
     Args:
-        N (int): Number of pixels along one dimension (must be power of 2, e.g., 256, 512).
+        N (int): Number of pixels along one dimension. Must be even (so r = 0 falls on pixel N/2);
+            powers of 2 (e.g. 256, 512) are fastest for the FFT but not required.
         L (float): Total physical length of the grid in meters (e.g., 0.01 for 10 mm).
         device (torch.device): The device (CPU/GPU) where the tensors will reside.
         
@@ -46,10 +47,16 @@ def create_circular_mask(R: torch.Tensor, radius: float):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from physics.config import OpticsConfig
 
-    N_pixels = 256
-    L_meters = 0.01  # 10 mm total grid size
-    pupil_radius = 0.004  # 4 mm lens radius
+    # Use the validated default geometry (a 4 mm radius would be undersampled, Q ~ 1.25)
+    cfg = OpticsConfig()
+    N_pixels = cfg.N
+    L_meters = cfg.L
+    pupil_radius = cfg.pupil_radius
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
@@ -79,5 +86,7 @@ if __name__ == "__main__":
     axes[1].set_title(f"Aperture Mask (Radius = {pupil_radius*1000} mm)")
     fig.colorbar(c2, ax=axes[1], label="Amplitude Transmission")
     
+    print(f"Grid {N_pixels} px over {L_meters * 1e3:.0f} mm, pupil radius {pupil_radius * 1e3:.1f} mm, "
+          f"{int(mask.sum().item())} pupil pixels (Q = {cfg.Q:.2f})")
     plt.tight_layout()
     plt.show()
