@@ -43,3 +43,5 @@ Modal head parameters: 166,675 (trainable: True)
 ==> Epoch 021/250 | Train: 0.3288 (phase 0.1002, coeff 0.2272, bg 0.0143) | Val: 0.5036 (phase 0.1918, coeff 0.3102) | LR: 2.95e-04 | time 83s train (49 samples/s) + 6s val
 ==> Epoch 022/250 | Train: 0.3180 (phase 0.0936, coeff 0.2231, bg 0.0134) | Val: 0.3103 (phase 0.0937, coeff 0.2149) | LR: 2.95e-04 | time 83s train (49 samples/s) + 6s val
 ==> Epoch 023/250 | Train: 0.3113 (phase 0.0883, coeff 0.2217, bg 0.0132) | Val: 0.3358 (phase 0.1107, coeff 0.2238) | LR: 2.94e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 024/250 | Train: 0.2981 (phase 0.0824, coeff 0.2144, bg 0.0128) | Val: 0.3584 (phase 0.1184, coeff 0.2385) | LR: 2.94e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 025/250 | Train: 0.2910 (phase 0.0777, coeff 0.2121, bg 0.0122) | Val: 0.3004 (phase 0.0892, coeff 0.2102) | LR: 2.93e-04 | time 83s train (49 samples/s) + 6s val
