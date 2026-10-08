@@ -45,3 +45,276 @@ Modal head parameters: 166,675 (trainable: True)
 ==> Epoch 023/250 | Train: 0.3113 (phase 0.0883, coeff 0.2217, bg 0.0132) | Val: 0.3358 (phase 0.1107, coeff 0.2238) | LR: 2.94e-04 | time 83s train (49 samples/s) + 6s val
 ==> Epoch 024/250 | Train: 0.2981 (phase 0.0824, coeff 0.2144, bg 0.0128) | Val: 0.3584 (phase 0.1184, coeff 0.2385) | LR: 2.94e-04 | time 83s train (49 samples/s) + 6s val
 ==> Epoch 025/250 | Train: 0.2910 (phase 0.0777, coeff 0.2121, bg 0.0122) | Val: 0.3004 (phase 0.0892, coeff 0.2102) | LR: 2.93e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 026/250 | Train: 0.2918 (phase 0.0788, coeff 0.2118, bg 0.0119) | Val: 0.3038 (phase 0.0866, coeff 0.2159) | LR: 2.93e-04 | time 83s train (49 samples/s) + 7s val
+==> Epoch 027/250 | Train: 0.2838 (phase 0.0746, coeff 0.2081, bg 0.0109) | Val: 0.2961 (phase 0.0865, coeff 0.2087) | LR: 2.92e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 028/250 | Train: 0.2779 (phase 0.0722, coeff 0.2046, bg 0.0105) | Val: 0.2488 (phase 0.0713, coeff 0.1764) | LR: 2.91e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 029/250 | Train: 0.2783 (phase 0.0710, coeff 0.2063, bg 0.0104) | Val: 0.3505 (phase 0.1131, coeff 0.2363) | LR: 2.91e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 030/250 | Train: 0.2713 (phase 0.0667, coeff 0.2035, bg 0.0103) | Val: 0.2417 (phase 0.0506, coeff 0.1903) | LR: 2.90e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.939 | even 0.928 | worst Noll 13 = 0.850 | head mean 0.353
+    per mode: 4:0.99 5:0.98 6:0.96 7:0.97 8:0.98 9:0.89 10:0.90 11:0.98 12:0.87 13:0.85 14:0.92 15:0.93 16:0.93 17:0.93 18:0.92 19:0.95 20:0.96 21:0.96 22:0.87
+==> Epoch 031/250 | Train: 0.2661 (phase 0.0643, coeff 0.2008, bg 0.0097) | Val: 0.2767 (phase 0.0779, coeff 0.1979) | LR: 2.90e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 032/250 | Train: 0.2637 (phase 0.0623, coeff 0.2005, bg 0.0098) | Val: 0.2534 (phase 0.0627, coeff 0.1898) | LR: 2.89e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 033/250 | Train: 0.2574 (phase 0.0592, coeff 0.1972, bg 0.0094) | Val: 0.2454 (phase 0.0552, coeff 0.1892) | LR: 2.88e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 034/250 | Train: 0.2535 (phase 0.0571, coeff 0.1955, bg 0.0092) | Val: 0.2529 (phase 0.0560, coeff 0.1961) | LR: 2.87e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 035/250 | Train: 0.2499 (phase 0.0549, coeff 0.1940, bg 0.0094) | Val: 0.2150 (phase 0.0421, coeff 0.1720) | LR: 2.87e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 036/250 | Train: 0.2506 (phase 0.0560, coeff 0.1938, bg 0.0085) | Val: 0.2525 (phase 0.0537, coeff 0.1980) | LR: 2.86e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 037/250 | Train: 0.2455 (phase 0.0538, coeff 0.1909, bg 0.0081) | Val: 0.2411 (phase 0.0573, coeff 0.1829) | LR: 2.85e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 038/250 | Train: 0.2498 (phase 0.0557, coeff 0.1933, bg 0.0079) | Val: 0.2185 (phase 0.0375, coeff 0.1801) | LR: 2.84e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 039/250 | Train: 0.2413 (phase 0.0519, coeff 0.1887, bg 0.0075) | Val: 0.2432 (phase 0.0515, coeff 0.1911) | LR: 2.83e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 040/250 | Train: 0.2400 (phase 0.0504, coeff 0.1888, bg 0.0076) | Val: 0.2133 (phase 0.0400, coeff 0.1727) | LR: 2.82e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.946 | even 0.934 | worst Noll 22 = 0.767 | head mean 0.368
+    per mode: 4:0.99 5:0.98 6:0.98 7:0.99 8:0.98 9:0.90 10:0.90 11:0.98 12:0.92 13:0.91 14:0.94 15:0.94 16:0.92 17:0.94 18:0.95 19:0.95 20:0.96 21:0.96 22:0.77
+==> Epoch 041/250 | Train: 0.2433 (phase 0.0538, coeff 0.1887, bg 0.0077) | Val: 0.2092 (phase 0.0351, coeff 0.1735) | LR: 2.82e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 042/250 | Train: 0.2325 (phase 0.0487, coeff 0.1830, bg 0.0070) | Val: 0.2088 (phase 0.0355, coeff 0.1726) | LR: 2.81e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 043/250 | Train: 0.2304 (phase 0.0483, coeff 0.1814, bg 0.0068) | Val: 0.4062 (phase 0.1610, coeff 0.2444) | LR: 2.80e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 044/250 | Train: 0.2314 (phase 0.0490, coeff 0.1817, bg 0.0068) | Val: 0.2031 (phase 0.0402, coeff 0.1621) | LR: 2.79e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 045/250 | Train: 0.2261 (phase 0.0472, coeff 0.1782, bg 0.0069) | Val: 0.1995 (phase 0.0360, coeff 0.1629) | LR: 2.78e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 046/250 | Train: 0.2246 (phase 0.0467, coeff 0.1773, bg 0.0059) | Val: 0.1917 (phase 0.0304, coeff 0.1608) | LR: 2.77e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 047/250 | Train: 0.2198 (phase 0.0455, coeff 0.1737, bg 0.0058) | Val: 0.1894 (phase 0.0338, coeff 0.1549) | LR: 2.76e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 048/250 | Train: 0.2133 (phase 0.0438, coeff 0.1690, bg 0.0056) | Val: 0.1954 (phase 0.0369, coeff 0.1579) | LR: 2.75e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 049/250 | Train: 0.2128 (phase 0.0437, coeff 0.1686, bg 0.0053) | Val: 0.2088 (phase 0.0436, coeff 0.1647) | LR: 2.74e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 050/250 | Train: 0.2120 (phase 0.0443, coeff 0.1672, bg 0.0052) | Val: 0.2130 (phase 0.0521, coeff 0.1603) | LR: 2.73e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.946 | even 0.930 | worst Noll 22 = 0.840 | head mean 0.445
+    per mode: 4:0.99 5:0.97 6:0.98 7:0.98 8:0.99 9:0.92 10:0.91 11:0.96 12:0.91 13:0.85 14:0.93 15:0.93 16:0.93 17:0.93 18:0.95 19:0.93 20:0.96 21:0.96 22:0.84
+==> Epoch 051/250 | Train: 0.2119 (phase 0.0443, coeff 0.1671, bg 0.0051) | Val: 0.1851 (phase 0.0313, coeff 0.1531) | LR: 2.71e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 052/250 | Train: 0.2131 (phase 0.0453, coeff 0.1673, bg 0.0052) | Val: 0.2345 (phase 0.0676, coeff 0.1663) | LR: 2.70e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 053/250 | Train: 0.2085 (phase 0.0454, coeff 0.1626, bg 0.0046) | Val: 0.1911 (phase 0.0322, coeff 0.1585) | LR: 2.69e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 054/250 | Train: 0.2060 (phase 0.0431, coeff 0.1624, bg 0.0049) | Val: 0.1689 (phase 0.0259, coeff 0.1426) | LR: 2.68e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 055/250 | Train: 0.2018 (phase 0.0422, coeff 0.1592, bg 0.0046) | Val: 0.1931 (phase 0.0396, coeff 0.1532) | LR: 2.67e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 056/250 | Train: 0.2043 (phase 0.0442, coeff 0.1596, bg 0.0047) | Val: 0.1639 (phase 0.0273, coeff 0.1362) | LR: 2.66e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 057/250 | Train: 0.2001 (phase 0.0425, coeff 0.1571, bg 0.0043) | Val: 0.1683 (phase 0.0285, coeff 0.1392) | LR: 2.64e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 058/250 | Train: 0.1951 (phase 0.0402, coeff 0.1545, bg 0.0041) | Val: 0.2278 (phase 0.0594, coeff 0.1677) | LR: 2.63e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 059/250 | Train: 0.1942 (phase 0.0406, coeff 0.1532, bg 0.0040) | Val: 0.1618 (phase 0.0238, coeff 0.1377) | LR: 2.62e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 060/250 | Train: 0.1950 (phase 0.0408, coeff 0.1539, bg 0.0039) | Val: 0.2197 (phase 0.0614, coeff 0.1579) | LR: 2.61e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.947 | even 0.939 | worst Noll 22 = 0.858 | head mean 0.482
+    per mode: 4:0.96 5:0.94 6:0.96 7:0.99 8:0.99 9:0.87 10:0.89 11:0.99 12:0.93 13:0.92 14:0.95 15:0.95 16:0.95 17:0.94 18:0.95 19:0.95 20:0.97 21:0.97 22:0.86
+==> Epoch 061/250 | Train: 0.1937 (phase 0.0405, coeff 0.1528, bg 0.0038) | Val: 0.2139 (phase 0.0520, coeff 0.1614) | LR: 2.59e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 062/250 | Train: 0.1934 (phase 0.0402, coeff 0.1529, bg 0.0037) | Val: 0.1706 (phase 0.0348, coeff 0.1354) | LR: 2.58e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 063/250 | Train: 0.1890 (phase 0.0385, coeff 0.1501, bg 0.0036) | Val: 0.1596 (phase 0.0254, coeff 0.1338) | LR: 2.57e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 064/250 | Train: 0.1914 (phase 0.0400, coeff 0.1510, bg 0.0037) | Val: 0.1536 (phase 0.0219, coeff 0.1315) | LR: 2.56e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 065/250 | Train: 0.1914 (phase 0.0399, coeff 0.1511, bg 0.0035) | Val: 0.1558 (phase 0.0262, coeff 0.1294) | LR: 2.54e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 066/250 | Train: 0.1871 (phase 0.0386, coeff 0.1482, bg 0.0034) | Val: 0.1603 (phase 0.0276, coeff 0.1325) | LR: 2.53e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 067/250 | Train: 0.1879 (phase 0.0391, coeff 0.1485, bg 0.0035) | Val: 0.1828 (phase 0.0421, coeff 0.1404) | LR: 2.51e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 068/250 | Train: 0.1835 (phase 0.0385, coeff 0.1446, bg 0.0033) | Val: 0.1468 (phase 0.0221, coeff 0.1244) | LR: 2.50e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 069/250 | Train: 0.1823 (phase 0.0389, coeff 0.1431, bg 0.0031) | Val: 0.1562 (phase 0.0258, coeff 0.1301) | LR: 2.49e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 070/250 | Train: 0.1794 (phase 0.0378, coeff 0.1413, bg 0.0032) | Val: 0.1597 (phase 0.0289, coeff 0.1305) | LR: 2.47e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.942 | even 0.960 | worst Noll 9 = 0.801 | head mean 0.522
+    per mode: 4:0.99 5:0.98 6:0.99 7:0.98 8:0.99 9:0.80 10:0.87 11:0.99 12:0.92 13:0.92 14:0.94 15:0.94 16:0.93 17:0.95 18:0.97 19:0.96 20:0.97 21:0.98 22:0.97
+==> Epoch 071/250 | Train: 0.1777 (phase 0.0380, coeff 0.1394, bg 0.0029) | Val: 0.1462 (phase 0.0276, coeff 0.1183) | LR: 2.46e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 072/250 | Train: 0.1760 (phase 0.0382, coeff 0.1376, bg 0.0029) | Val: 0.1377 (phase 0.0216, coeff 0.1158) | LR: 2.44e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 073/250 | Train: 0.1769 (phase 0.0391, coeff 0.1375, bg 0.0031) | Val: 0.1505 (phase 0.0320, coeff 0.1183) | LR: 2.43e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 074/250 | Train: 0.1735 (phase 0.0393, coeff 0.1340, bg 0.0027) | Val: 0.1415 (phase 0.0252, coeff 0.1161) | LR: 2.41e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 075/250 | Train: 0.1688 (phase 0.0379, coeff 0.1306, bg 0.0026) | Val: 0.1432 (phase 0.0263, coeff 0.1167) | LR: 2.40e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 076/250 | Train: 0.1702 (phase 0.0386, coeff 0.1313, bg 0.0027) | Val: 0.1402 (phase 0.0260, coeff 0.1139) | LR: 2.38e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 077/250 | Train: 0.1680 (phase 0.0383, coeff 0.1295, bg 0.0024) | Val: 0.1301 (phase 0.0220, coeff 0.1078) | LR: 2.37e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 078/250 | Train: 0.1650 (phase 0.0379, coeff 0.1269, bg 0.0024) | Val: 0.1441 (phase 0.0291, coeff 0.1147) | LR: 2.35e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 079/250 | Train: 0.1658 (phase 0.0387, coeff 0.1268, bg 0.0024) | Val: 0.1288 (phase 0.0204, coeff 0.1082) | LR: 2.34e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 080/250 | Train: 0.1615 (phase 0.0372, coeff 0.1242, bg 0.0022) | Val: 0.1278 (phase 0.0240, coeff 0.1036) | LR: 2.32e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.952 | even 0.959 | worst Noll 10 = 0.792 | head mean 0.601
+    per mode: 4:1.00 5:0.99 6:0.99 7:0.99 8:0.99 9:0.94 10:0.79 11:0.99 12:0.94 13:0.87 14:0.96 15:0.96 16:0.96 17:0.96 18:0.96 19:0.97 20:0.98 21:0.98 22:0.93
+==> Epoch 081/250 | Train: 0.1600 (phase 0.0377, coeff 0.1221, bg 0.0023) | Val: 0.1324 (phase 0.0273, coeff 0.1049) | LR: 2.31e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 082/250 | Train: 0.1590 (phase 0.0381, coeff 0.1207, bg 0.0022) | Val: 0.1219 (phase 0.0236, coeff 0.0981) | LR: 2.29e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 083/250 | Train: 0.1593 (phase 0.0393, coeff 0.1198, bg 0.0022) | Val: 0.1174 (phase 0.0230, coeff 0.0943) | LR: 2.27e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 084/250 | Train: 0.1559 (phase 0.0390, coeff 0.1168, bg 0.0021) | Val: 0.1261 (phase 0.0283, coeff 0.0976) | LR: 2.26e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 085/250 | Train: 0.1548 (phase 0.0390, coeff 0.1156, bg 0.0022) | Val: 0.1347 (phase 0.0342, coeff 0.1003) | LR: 2.24e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 086/250 | Train: 0.1555 (phase 0.0394, coeff 0.1159, bg 0.0019) | Val: 0.1249 (phase 0.0280, coeff 0.0967) | LR: 2.23e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 087/250 | Train: 0.1536 (phase 0.0393, coeff 0.1141, bg 0.0018) | Val: 0.1229 (phase 0.0261, coeff 0.0966) | LR: 2.21e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 088/250 | Train: 0.1482 (phase 0.0373, coeff 0.1107, bg 0.0018) | Val: 0.1270 (phase 0.0270, coeff 0.0998) | LR: 2.19e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 089/250 | Train: 0.1458 (phase 0.0364, coeff 0.1092, bg 0.0018) | Val: 0.1150 (phase 0.0228, coeff 0.0920) | LR: 2.18e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 090/250 | Train: 0.1482 (phase 0.0378, coeff 0.1102, bg 0.0018) | Val: 0.1068 (phase 0.0204, coeff 0.0862) | LR: 2.16e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.966 | even 0.973 | worst Noll 9 = 0.941 | head mean 0.668
+    per mode: 4:0.99 5:0.99 6:0.99 7:0.99 8:0.99 9:0.94 10:0.95 11:0.99 12:0.95 13:0.95 14:0.97 15:0.97 16:0.96 17:0.95 18:0.96 19:0.97 20:0.97 21:0.98 22:0.94
+==> Epoch 091/250 | Train: 0.1437 (phase 0.0369, coeff 0.1066, bg 0.0017) | Val: 0.1066 (phase 0.0204, coeff 0.0860) | LR: 2.14e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 092/250 | Train: 0.1453 (phase 0.0384, coeff 0.1067, bg 0.0016) | Val: 0.1193 (phase 0.0303, coeff 0.0889) | LR: 2.12e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 093/250 | Train: 0.1437 (phase 0.0384, coeff 0.1052, bg 0.0016) | Val: 0.1090 (phase 0.0221, coeff 0.0867) | LR: 2.11e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 094/250 | Train: 0.1433 (phase 0.0380, coeff 0.1051, bg 0.0016) | Val: 0.1019 (phase 0.0195, coeff 0.0823) | LR: 2.09e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 095/250 | Train: 0.1398 (phase 0.0369, coeff 0.1027, bg 0.0016) | Val: 0.1027 (phase 0.0204, coeff 0.0822) | LR: 2.07e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 096/250 | Train: 0.1399 (phase 0.0368, coeff 0.1030, bg 0.0015) | Val: 0.1012 (phase 0.0204, coeff 0.0806) | LR: 2.06e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 097/250 | Train: 0.1393 (phase 0.0367, coeff 0.1025, bg 0.0015) | Val: 0.1003 (phase 0.0196, coeff 0.0806) | LR: 2.04e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 098/250 | Train: 0.1396 (phase 0.0369, coeff 0.1025, bg 0.0016) | Val: 0.1027 (phase 0.0205, coeff 0.0821) | LR: 2.02e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 099/250 | Train: 0.1382 (phase 0.0365, coeff 0.1015, bg 0.0015) | Val: 0.1015 (phase 0.0204, coeff 0.0811) | LR: 2.00e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 100/250 | Train: 0.1368 (phase 0.0364, coeff 0.1003, bg 0.0014) | Val: 0.1052 (phase 0.0212, coeff 0.0839) | LR: 1.98e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.968 | even 0.964 | worst Noll 22 = 0.897 | head mean 0.688
+    per mode: 4:0.99 5:0.99 6:0.99 7:0.99 8:0.99 9:0.95 10:0.94 11:0.99 12:0.95 13:0.94 14:0.96 15:0.96 16:0.96 17:0.97 18:0.96 19:0.96 20:0.98 21:0.98 22:0.90
+==> Epoch 101/250 | Train: 0.1375 (phase 0.0365, coeff 0.1009, bg 0.0014) | Val: 0.0963 (phase 0.0172, coeff 0.0790) | LR: 1.97e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 102/250 | Train: 0.1357 (phase 0.0355, coeff 0.1001, bg 0.0014) | Val: 0.1111 (phase 0.0241, coeff 0.0869) | LR: 1.95e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 103/250 | Train: 0.1366 (phase 0.0361, coeff 0.1004, bg 0.0014) | Val: 0.1002 (phase 0.0196, coeff 0.0806) | LR: 1.93e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 104/250 | Train: 0.1353 (phase 0.0355, coeff 0.0996, bg 0.0013) | Val: 0.0966 (phase 0.0184, coeff 0.0780) | LR: 1.91e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 105/250 | Train: 0.1354 (phase 0.0361, coeff 0.0992, bg 0.0013) | Val: 0.1012 (phase 0.0204, coeff 0.0807) | LR: 1.89e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 106/250 | Train: 0.1320 (phase 0.0353, coeff 0.0966, bg 0.0012) | Val: 0.0954 (phase 0.0192, coeff 0.0761) | LR: 1.88e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 107/250 | Train: 0.1311 (phase 0.0343, coeff 0.0967, bg 0.0012) | Val: 0.0898 (phase 0.0155, coeff 0.0742) | LR: 1.86e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 108/250 | Train: 0.1325 (phase 0.0350, coeff 0.0974, bg 0.0013) | Val: 0.1011 (phase 0.0214, coeff 0.0796) | LR: 1.84e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 109/250 | Train: 0.1312 (phase 0.0351, coeff 0.0961, bg 0.0012) | Val: 0.0859 (phase 0.0157, coeff 0.0701) | LR: 1.82e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 110/250 | Train: 0.1308 (phase 0.0356, coeff 0.0951, bg 0.0011) | Val: 0.1013 (phase 0.0216, coeff 0.0797) | LR: 1.80e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.965 | even 0.961 | worst Noll 12 = 0.843 | head mean 0.720
+    per mode: 4:0.99 5:0.99 6:0.99 7:0.99 8:0.99 9:0.95 10:0.94 11:1.00 12:0.84 13:0.93 14:0.97 15:0.96 16:0.96 17:0.95 18:0.96 19:0.96 20:0.98 21:0.98 22:0.98
+==> Epoch 111/250 | Train: 0.1270 (phase 0.0349, coeff 0.0919, bg 0.0011) | Val: 0.0921 (phase 0.0201, coeff 0.0719) | LR: 1.79e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 112/250 | Train: 0.1262 (phase 0.0347, coeff 0.0914, bg 0.0011) | Val: 0.0900 (phase 0.0193, coeff 0.0706) | LR: 1.77e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 113/250 | Train: 0.1273 (phase 0.0358, coeff 0.0914, bg 0.0011) | Val: 0.0868 (phase 0.0173, coeff 0.0694) | LR: 1.75e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 114/250 | Train: 0.1254 (phase 0.0354, coeff 0.0898, bg 0.0011) | Val: 0.0821 (phase 0.0158, coeff 0.0662) | LR: 1.73e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 115/250 | Train: 0.1252 (phase 0.0355, coeff 0.0895, bg 0.0011) | Val: 0.0829 (phase 0.0170, coeff 0.0658) | LR: 1.71e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 116/250 | Train: 0.1217 (phase 0.0339, coeff 0.0877, bg 0.0010) | Val: 0.0964 (phase 0.0211, coeff 0.0752) | LR: 1.69e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 117/250 | Train: 0.1235 (phase 0.0350, coeff 0.0884, bg 0.0010) | Val: 0.0821 (phase 0.0168, coeff 0.0652) | LR: 1.67e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 118/250 | Train: 0.1237 (phase 0.0353, coeff 0.0883, bg 0.0010) | Val: 0.0899 (phase 0.0202, coeff 0.0697) | LR: 1.66e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 119/250 | Train: 0.1210 (phase 0.0345, coeff 0.0864, bg 0.0009) | Val: 0.0832 (phase 0.0195, coeff 0.0636) | LR: 1.64e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 120/250 | Train: 0.1202 (phase 0.0348, coeff 0.0854, bg 0.0009) | Val: 0.0868 (phase 0.0195, coeff 0.0672) | LR: 1.62e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.969 | even 0.973 | worst Noll 17 = 0.939 | head mean 0.765
+    per mode: 4:0.99 5:0.99 6:0.99 7:0.99 8:1.00 9:0.97 10:0.95 11:0.99 12:0.95 13:0.95 14:0.96 15:0.95 16:0.96 17:0.94 18:0.97 19:0.95 20:0.98 21:0.98 22:0.97
+==> Epoch 121/250 | Train: 0.1191 (phase 0.0348, coeff 0.0842, bg 0.0009) | Val: 0.0731 (phase 0.0144, coeff 0.0587) | LR: 1.60e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 122/250 | Train: 0.1186 (phase 0.0346, coeff 0.0839, bg 0.0009) | Val: 0.0779 (phase 0.0180, coeff 0.0598) | LR: 1.58e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 123/250 | Train: 0.1160 (phase 0.0340, coeff 0.0819, bg 0.0009) | Val: 0.0728 (phase 0.0152, coeff 0.0575) | LR: 1.56e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 124/250 | Train: 0.1150 (phase 0.0347, coeff 0.0802, bg 0.0008) | Val: 0.0838 (phase 0.0211, coeff 0.0627) | LR: 1.54e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 125/250 | Train: 0.1170 (phase 0.0356, coeff 0.0814, bg 0.0008) | Val: 0.0769 (phase 0.0169, coeff 0.0599) | LR: 1.52e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 126/250 | Train: 0.1135 (phase 0.0341, coeff 0.0794, bg 0.0008) | Val: 0.0665 (phase 0.0126, coeff 0.0538) | LR: 1.50e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 127/250 | Train: 0.1128 (phase 0.0339, coeff 0.0788, bg 0.0008) | Val: 0.0719 (phase 0.0161, coeff 0.0557) | LR: 1.49e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 128/250 | Train: 0.1134 (phase 0.0342, coeff 0.0791, bg 0.0008) | Val: 0.0662 (phase 0.0133, coeff 0.0528) | LR: 1.47e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 129/250 | Train: 0.1140 (phase 0.0343, coeff 0.0796, bg 0.0008) | Val: 0.0687 (phase 0.0143, coeff 0.0544) | LR: 1.45e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 130/250 | Train: 0.1118 (phase 0.0334, coeff 0.0783, bg 0.0008) | Val: 0.0720 (phase 0.0149, coeff 0.0571) | LR: 1.43e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.974 | even 0.978 | worst Noll 10 = 0.948 | head mean 0.793
+    per mode: 4:1.00 5:0.99 6:0.99 7:0.99 8:0.99 9:0.97 10:0.95 11:1.00 12:0.96 13:0.96 14:0.96 15:0.97 16:0.97 17:0.95 18:0.97 19:0.97 20:0.98 21:0.98 22:0.98
+==> Epoch 131/250 | Train: 0.1125 (phase 0.0336, coeff 0.0788, bg 0.0008) | Val: 0.0671 (phase 0.0140, coeff 0.0530) | LR: 1.41e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 132/250 | Train: 0.1115 (phase 0.0339, coeff 0.0776, bg 0.0007) | Val: 0.0661 (phase 0.0137, coeff 0.0524) | LR: 1.39e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 133/250 | Train: 0.1117 (phase 0.0337, coeff 0.0780, bg 0.0007) | Val: 0.0650 (phase 0.0136, coeff 0.0513) | LR: 1.37e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 134/250 | Train: 0.1117 (phase 0.0336, coeff 0.0780, bg 0.0007) | Val: 0.0659 (phase 0.0141, coeff 0.0517) | LR: 1.35e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 135/250 | Train: 0.1106 (phase 0.0334, coeff 0.0771, bg 0.0007) | Val: 0.0671 (phase 0.0154, coeff 0.0517) | LR: 1.34e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 136/250 | Train: 0.1087 (phase 0.0323, coeff 0.0763, bg 0.0007) | Val: 0.0669 (phase 0.0137, coeff 0.0531) | LR: 1.32e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 137/250 | Train: 0.1106 (phase 0.0331, coeff 0.0775, bg 0.0007) | Val: 0.0668 (phase 0.0154, coeff 0.0513) | LR: 1.30e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 138/250 | Train: 0.1094 (phase 0.0326, coeff 0.0767, bg 0.0007) | Val: 0.0628 (phase 0.0133, coeff 0.0494) | LR: 1.28e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 139/250 | Train: 0.1090 (phase 0.0324, coeff 0.0765, bg 0.0007) | Val: 0.0644 (phase 0.0135, coeff 0.0508) | LR: 1.26e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 140/250 | Train: 0.1093 (phase 0.0332, coeff 0.0760, bg 0.0007) | Val: 0.0665 (phase 0.0154, coeff 0.0510) | LR: 1.24e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.973 | even 0.980 | worst Noll 19 = 0.951 | head mean 0.802
+    per mode: 4:0.99 5:0.99 6:0.99 7:1.00 8:0.99 9:0.96 10:0.96 11:0.99 12:0.97 13:0.96 14:0.97 15:0.97 16:0.97 17:0.97 18:0.96 19:0.95 20:0.99 21:0.99 22:0.97
+==> Epoch 141/250 | Train: 0.1085 (phase 0.0327, coeff 0.0758, bg 0.0007) | Val: 0.0670 (phase 0.0156, coeff 0.0514) | LR: 1.22e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 142/250 | Train: 0.1093 (phase 0.0331, coeff 0.0761, bg 0.0007) | Val: 0.0694 (phase 0.0181, coeff 0.0513) | LR: 1.21e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 143/250 | Train: 0.1083 (phase 0.0323, coeff 0.0759, bg 0.0007) | Val: 0.0660 (phase 0.0135, coeff 0.0524) | LR: 1.19e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 144/250 | Train: 0.1077 (phase 0.0324, coeff 0.0752, bg 0.0007) | Val: 0.0620 (phase 0.0131, coeff 0.0488) | LR: 1.17e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 145/250 | Train: 0.1069 (phase 0.0322, coeff 0.0746, bg 0.0007) | Val: 0.0655 (phase 0.0134, coeff 0.0520) | LR: 1.15e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 146/250 | Train: 0.1055 (phase 0.0313, coeff 0.0742, bg 0.0007) | Val: 0.0584 (phase 0.0117, coeff 0.0466) | LR: 1.13e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 147/250 | Train: 0.1044 (phase 0.0314, coeff 0.0729, bg 0.0006) | Val: 0.0625 (phase 0.0137, coeff 0.0488) | LR: 1.12e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 148/250 | Train: 0.1047 (phase 0.0314, coeff 0.0732, bg 0.0006) | Val: 0.0605 (phase 0.0121, coeff 0.0483) | LR: 1.10e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 149/250 | Train: 0.1042 (phase 0.0317, coeff 0.0724, bg 0.0006) | Val: 0.0730 (phase 0.0165, coeff 0.0564) | LR: 1.08e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 150/250 | Train: 0.1022 (phase 0.0307, coeff 0.0714, bg 0.0006) | Val: 0.0578 (phase 0.0122, coeff 0.0456) | LR: 1.06e-04 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.977 | even 0.981 | worst Noll 14 = 0.961 | head mean 0.821
+    per mode: 4:1.00 5:0.99 6:1.00 7:0.99 8:1.00 9:0.97 10:0.96 11:1.00 12:0.97 13:0.97 14:0.96 15:0.97 16:0.97 17:0.97 18:0.97 19:0.97 20:0.99 21:0.99 22:0.98
+==> Epoch 151/250 | Train: 0.1019 (phase 0.0305, coeff 0.0713, bg 0.0006) | Val: 0.0627 (phase 0.0151, coeff 0.0476) | LR: 1.04e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 152/250 | Train: 0.1024 (phase 0.0313, coeff 0.0710, bg 0.0006) | Val: 0.0585 (phase 0.0124, coeff 0.0460) | LR: 1.03e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 153/250 | Train: 0.1015 (phase 0.0310, coeff 0.0705, bg 0.0006) | Val: 0.0608 (phase 0.0133, coeff 0.0474) | LR: 1.01e-04 | time 83s train (49 samples/s) + 6s val
+==> Epoch 154/250 | Train: 0.1010 (phase 0.0310, coeff 0.0699, bg 0.0006) | Val: 0.0549 (phase 0.0115, coeff 0.0433) | LR: 9.90e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 155/250 | Train: 0.0990 (phase 0.0307, coeff 0.0682, bg 0.0006) | Val: 0.0532 (phase 0.0112, coeff 0.0419) | LR: 9.72e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 156/250 | Train: 0.1010 (phase 0.0318, coeff 0.0691, bg 0.0005) | Val: 0.0560 (phase 0.0125, coeff 0.0434) | LR: 9.55e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 157/250 | Train: 0.1002 (phase 0.0318, coeff 0.0684, bg 0.0005) | Val: 0.0549 (phase 0.0127, coeff 0.0422) | LR: 9.37e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 158/250 | Train: 0.0997 (phase 0.0319, coeff 0.0678, bg 0.0005) | Val: 0.0526 (phase 0.0123, coeff 0.0402) | LR: 9.20e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 159/250 | Train: 0.0987 (phase 0.0318, coeff 0.0669, bg 0.0005) | Val: 0.0560 (phase 0.0138, coeff 0.0422) | LR: 9.03e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 160/250 | Train: 0.0968 (phase 0.0311, coeff 0.0657, bg 0.0005) | Val: 0.0529 (phase 0.0125, coeff 0.0404) | LR: 8.86e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.977 | even 0.979 | worst Noll 12 = 0.947 | head mean 0.846
+    per mode: 4:1.00 5:1.00 6:1.00 7:0.99 8:1.00 9:0.95 10:0.96 11:1.00 12:0.95 13:0.97 14:0.97 15:0.96 16:0.98 17:0.98 18:0.97 19:0.97 20:0.98 21:0.99 22:0.97
+==> Epoch 161/250 | Train: 0.0966 (phase 0.0314, coeff 0.0651, bg 0.0005) | Val: 0.0510 (phase 0.0121, coeff 0.0388) | LR: 8.68e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 162/250 | Train: 0.0968 (phase 0.0313, coeff 0.0655, bg 0.0005) | Val: 0.0495 (phase 0.0114, coeff 0.0380) | LR: 8.52e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 163/250 | Train: 0.0968 (phase 0.0314, coeff 0.0654, bg 0.0005) | Val: 0.0548 (phase 0.0133, coeff 0.0414) | LR: 8.35e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 164/250 | Train: 0.0967 (phase 0.0313, coeff 0.0653, bg 0.0005) | Val: 0.0512 (phase 0.0126, coeff 0.0386) | LR: 8.18e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 165/250 | Train: 0.0960 (phase 0.0311, coeff 0.0649, bg 0.0005) | Val: 0.0496 (phase 0.0113, coeff 0.0383) | LR: 8.01e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 166/250 | Train: 0.0933 (phase 0.0304, coeff 0.0628, bg 0.0005) | Val: 0.0484 (phase 0.0106, coeff 0.0378) | LR: 7.85e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 167/250 | Train: 0.0954 (phase 0.0311, coeff 0.0643, bg 0.0005) | Val: 0.0486 (phase 0.0108, coeff 0.0378) | LR: 7.68e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 168/250 | Train: 0.0943 (phase 0.0306, coeff 0.0636, bg 0.0005) | Val: 0.0490 (phase 0.0126, coeff 0.0363) | LR: 7.52e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 169/250 | Train: 0.0943 (phase 0.0305, coeff 0.0637, bg 0.0005) | Val: 0.0492 (phase 0.0119, coeff 0.0373) | LR: 7.36e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 170/250 | Train: 0.0933 (phase 0.0306, coeff 0.0626, bg 0.0004) | Val: 0.0460 (phase 0.0094, coeff 0.0365) | LR: 7.20e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.983 | even 0.984 | worst Noll 15 = 0.965 | head mean 0.857
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.97 11:1.00 12:0.97 13:0.97 14:0.97 15:0.97 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.98
+==> Epoch 171/250 | Train: 0.0942 (phase 0.0307, coeff 0.0634, bg 0.0004) | Val: 0.0488 (phase 0.0102, coeff 0.0385) | LR: 7.04e-05 | time 83s train (50 samples/s) + 6s val
+==> Epoch 172/250 | Train: 0.0931 (phase 0.0302, coeff 0.0628, bg 0.0004) | Val: 0.0459 (phase 0.0107, coeff 0.0351) | LR: 6.88e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 173/250 | Train: 0.0933 (phase 0.0306, coeff 0.0626, bg 0.0004) | Val: 0.0493 (phase 0.0117, coeff 0.0375) | LR: 6.72e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 174/250 | Train: 0.0930 (phase 0.0302, coeff 0.0628, bg 0.0004) | Val: 0.0469 (phase 0.0110, coeff 0.0359) | LR: 6.57e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 175/250 | Train: 0.0935 (phase 0.0303, coeff 0.0631, bg 0.0005) | Val: 0.0473 (phase 0.0106, coeff 0.0366) | LR: 6.42e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 176/250 | Train: 0.0929 (phase 0.0300, coeff 0.0629, bg 0.0004) | Val: 0.0472 (phase 0.0110, coeff 0.0362) | LR: 6.26e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 177/250 | Train: 0.0923 (phase 0.0299, coeff 0.0624, bg 0.0004) | Val: 0.0480 (phase 0.0110, coeff 0.0370) | LR: 6.11e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 178/250 | Train: 0.0930 (phase 0.0301, coeff 0.0628, bg 0.0004) | Val: 0.0441 (phase 0.0090, coeff 0.0351) | LR: 5.96e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 179/250 | Train: 0.0909 (phase 0.0294, coeff 0.0614, bg 0.0004) | Val: 0.0454 (phase 0.0099, coeff 0.0355) | LR: 5.81e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 180/250 | Train: 0.0907 (phase 0.0295, coeff 0.0612, bg 0.0004) | Val: 0.0439 (phase 0.0093, coeff 0.0346) | LR: 5.67e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.982 | even 0.985 | worst Noll 10 = 0.968 | head mean 0.861
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.97 11:1.00 12:0.98 13:0.97 14:0.98 15:0.97 16:0.97 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.98
+==> Epoch 181/250 | Train: 0.0922 (phase 0.0298, coeff 0.0624, bg 0.0004) | Val: 0.0435 (phase 0.0095, coeff 0.0340) | LR: 5.52e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 182/250 | Train: 0.0902 (phase 0.0288, coeff 0.0613, bg 0.0004) | Val: 0.0457 (phase 0.0115, coeff 0.0342) | LR: 5.38e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 183/250 | Train: 0.0899 (phase 0.0293, coeff 0.0606, bg 0.0004) | Val: 0.0451 (phase 0.0103, coeff 0.0348) | LR: 5.23e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 184/250 | Train: 0.0910 (phase 0.0292, coeff 0.0618, bg 0.0004) | Val: 0.0441 (phase 0.0101, coeff 0.0340) | LR: 5.09e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 185/250 | Train: 0.0895 (phase 0.0291, coeff 0.0604, bg 0.0004) | Val: 0.0425 (phase 0.0093, coeff 0.0331) | LR: 4.95e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 186/250 | Train: 0.0901 (phase 0.0291, coeff 0.0610, bg 0.0004) | Val: 0.0423 (phase 0.0092, coeff 0.0331) | LR: 4.82e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 187/250 | Train: 0.0900 (phase 0.0291, coeff 0.0608, bg 0.0004) | Val: 0.0423 (phase 0.0084, coeff 0.0339) | LR: 4.68e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 188/250 | Train: 0.0894 (phase 0.0287, coeff 0.0606, bg 0.0004) | Val: 0.0437 (phase 0.0090, coeff 0.0347) | LR: 4.55e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 189/250 | Train: 0.0891 (phase 0.0287, coeff 0.0604, bg 0.0004) | Val: 0.0427 (phase 0.0092, coeff 0.0335) | LR: 4.41e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 190/250 | Train: 0.0889 (phase 0.0288, coeff 0.0601, bg 0.0004) | Val: 0.0420 (phase 0.0082, coeff 0.0337) | LR: 4.28e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.985 | even 0.985 | worst Noll 15 = 0.968 | head mean 0.865
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.97 14:0.97 15:0.97 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 191/250 | Train: 0.0885 (phase 0.0286, coeff 0.0599, bg 0.0004) | Val: 0.0420 (phase 0.0087, coeff 0.0333) | LR: 4.15e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 192/250 | Train: 0.0892 (phase 0.0286, coeff 0.0606, bg 0.0004) | Val: 0.0447 (phase 0.0102, coeff 0.0345) | LR: 4.02e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 193/250 | Train: 0.0886 (phase 0.0283, coeff 0.0603, bg 0.0004) | Val: 0.0419 (phase 0.0085, coeff 0.0334) | LR: 3.90e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 194/250 | Train: 0.0881 (phase 0.0282, coeff 0.0599, bg 0.0004) | Val: 0.0421 (phase 0.0089, coeff 0.0332) | LR: 3.77e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 195/250 | Train: 0.0888 (phase 0.0286, coeff 0.0602, bg 0.0004) | Val: 0.0429 (phase 0.0086, coeff 0.0343) | LR: 3.65e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 196/250 | Train: 0.0879 (phase 0.0282, coeff 0.0597, bg 0.0004) | Val: 0.0425 (phase 0.0086, coeff 0.0339) | LR: 3.53e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 197/250 | Train: 0.0887 (phase 0.0283, coeff 0.0604, bg 0.0004) | Val: 0.0426 (phase 0.0087, coeff 0.0339) | LR: 3.41e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 198/250 | Train: 0.0872 (phase 0.0279, coeff 0.0593, bg 0.0004) | Val: 0.0418 (phase 0.0083, coeff 0.0334) | LR: 3.29e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 199/250 | Train: 0.0881 (phase 0.0284, coeff 0.0596, bg 0.0004) | Val: 0.0417 (phase 0.0095, coeff 0.0321) | LR: 3.18e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 200/250 | Train: 0.0878 (phase 0.0280, coeff 0.0597, bg 0.0004) | Val: 0.0405 (phase 0.0077, coeff 0.0328) | LR: 3.07e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.985 | even 0.987 | worst Noll 15 = 0.972 | head mean 0.866
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.97 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 201/250 | Train: 0.0869 (phase 0.0280, coeff 0.0589, bg 0.0004) | Val: 0.0406 (phase 0.0079, coeff 0.0326) | LR: 2.96e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 202/250 | Train: 0.0878 (phase 0.0280, coeff 0.0598, bg 0.0004) | Val: 0.0402 (phase 0.0079, coeff 0.0322) | LR: 2.85e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 203/250 | Train: 0.0875 (phase 0.0281, coeff 0.0594, bg 0.0004) | Val: 0.0409 (phase 0.0087, coeff 0.0322) | LR: 2.74e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 204/250 | Train: 0.0870 (phase 0.0279, coeff 0.0591, bg 0.0004) | Val: 0.0396 (phase 0.0077, coeff 0.0319) | LR: 2.63e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 205/250 | Train: 0.0876 (phase 0.0280, coeff 0.0596, bg 0.0004) | Val: 0.0403 (phase 0.0076, coeff 0.0326) | LR: 2.53e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 206/250 | Train: 0.0867 (phase 0.0278, coeff 0.0589, bg 0.0004) | Val: 0.0397 (phase 0.0080, coeff 0.0317) | LR: 2.43e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 207/250 | Train: 0.0857 (phase 0.0273, coeff 0.0583, bg 0.0004) | Val: 0.0400 (phase 0.0082, coeff 0.0318) | LR: 2.33e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 208/250 | Train: 0.0869 (phase 0.0276, coeff 0.0593, bg 0.0004) | Val: 0.0391 (phase 0.0075, coeff 0.0315) | LR: 2.23e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 209/250 | Train: 0.0852 (phase 0.0274, coeff 0.0578, bg 0.0004) | Val: 0.0392 (phase 0.0078, coeff 0.0314) | LR: 2.13e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 210/250 | Train: 0.0861 (phase 0.0276, coeff 0.0585, bg 0.0004) | Val: 0.0397 (phase 0.0080, coeff 0.0317) | LR: 2.04e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.986 | even 0.987 | worst Noll 15 = 0.973 | head mean 0.870
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.97 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 211/250 | Train: 0.0855 (phase 0.0271, coeff 0.0584, bg 0.0004) | Val: 0.0390 (phase 0.0076, coeff 0.0313) | LR: 1.95e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 212/250 | Train: 0.0859 (phase 0.0273, coeff 0.0586, bg 0.0004) | Val: 0.0390 (phase 0.0077, coeff 0.0313) | LR: 1.86e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 213/250 | Train: 0.0861 (phase 0.0272, coeff 0.0589, bg 0.0004) | Val: 0.0391 (phase 0.0072, coeff 0.0318) | LR: 1.77e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 214/250 | Train: 0.0858 (phase 0.0274, coeff 0.0584, bg 0.0004) | Val: 0.0391 (phase 0.0074, coeff 0.0317) | LR: 1.69e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 215/250 | Train: 0.0869 (phase 0.0276, coeff 0.0593, bg 0.0004) | Val: 0.0398 (phase 0.0075, coeff 0.0322) | LR: 1.60e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 216/250 | Train: 0.0859 (phase 0.0272, coeff 0.0586, bg 0.0004) | Val: 0.0386 (phase 0.0073, coeff 0.0312) | LR: 1.52e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 217/250 | Train: 0.0856 (phase 0.0272, coeff 0.0584, bg 0.0004) | Val: 0.0387 (phase 0.0072, coeff 0.0315) | LR: 1.44e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 218/250 | Train: 0.0848 (phase 0.0269, coeff 0.0578, bg 0.0003) | Val: 0.0382 (phase 0.0071, coeff 0.0311) | LR: 1.37e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 219/250 | Train: 0.0856 (phase 0.0274, coeff 0.0582, bg 0.0003) | Val: 0.0381 (phase 0.0072, coeff 0.0309) | LR: 1.29e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 220/250 | Train: 0.0851 (phase 0.0270, coeff 0.0580, bg 0.0004) | Val: 0.0393 (phase 0.0072, coeff 0.0320) | LR: 1.22e-05 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.986 | even 0.988 | worst Noll 15 = 0.976 | head mean 0.870
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.98 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 221/250 | Train: 0.0850 (phase 0.0269, coeff 0.0581, bg 0.0003) | Val: 0.0389 (phase 0.0070, coeff 0.0319) | LR: 1.15e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 222/250 | Train: 0.0853 (phase 0.0270, coeff 0.0583, bg 0.0004) | Val: 0.0386 (phase 0.0070, coeff 0.0316) | LR: 1.08e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 223/250 | Train: 0.0837 (phase 0.0267, coeff 0.0570, bg 0.0003) | Val: 0.0384 (phase 0.0072, coeff 0.0312) | LR: 1.02e-05 | time 83s train (49 samples/s) + 6s val
+==> Epoch 224/250 | Train: 0.0840 (phase 0.0267, coeff 0.0573, bg 0.0003) | Val: 0.0378 (phase 0.0069, coeff 0.0309) | LR: 9.52e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 225/250 | Train: 0.0843 (phase 0.0265, coeff 0.0578, bg 0.0003) | Val: 0.0387 (phase 0.0070, coeff 0.0317) | LR: 8.91e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 226/250 | Train: 0.0860 (phase 0.0272, coeff 0.0587, bg 0.0004) | Val: 0.0379 (phase 0.0069, coeff 0.0310) | LR: 8.32e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 227/250 | Train: 0.0836 (phase 0.0262, coeff 0.0574, bg 0.0003) | Val: 0.0377 (phase 0.0068, coeff 0.0309) | LR: 7.75e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 228/250 | Train: 0.0848 (phase 0.0268, coeff 0.0579, bg 0.0003) | Val: 0.0379 (phase 0.0068, coeff 0.0311) | LR: 7.20e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 229/250 | Train: 0.0852 (phase 0.0270, coeff 0.0582, bg 0.0003) | Val: 0.0377 (phase 0.0068, coeff 0.0308) | LR: 6.68e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 230/250 | Train: 0.0863 (phase 0.0270, coeff 0.0593, bg 0.0004) | Val: 0.0378 (phase 0.0069, coeff 0.0309) | LR: 6.18e-06 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.987 | even 0.988 | worst Noll 15 = 0.976 | head mean 0.872
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.98 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 231/250 | Train: 0.0842 (phase 0.0267, coeff 0.0574, bg 0.0003) | Val: 0.0377 (phase 0.0069, coeff 0.0308) | LR: 5.70e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 232/250 | Train: 0.0845 (phase 0.0267, coeff 0.0578, bg 0.0003) | Val: 0.0376 (phase 0.0070, coeff 0.0305) | LR: 5.24e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 233/250 | Train: 0.0855 (phase 0.0268, coeff 0.0587, bg 0.0004) | Val: 0.0374 (phase 0.0068, coeff 0.0307) | LR: 4.81e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 234/250 | Train: 0.0845 (phase 0.0268, coeff 0.0577, bg 0.0004) | Val: 0.0377 (phase 0.0068, coeff 0.0309) | LR: 4.40e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 235/250 | Train: 0.0855 (phase 0.0268, coeff 0.0587, bg 0.0004) | Val: 0.0374 (phase 0.0068, coeff 0.0306) | LR: 4.01e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 236/250 | Train: 0.0851 (phase 0.0268, coeff 0.0583, bg 0.0004) | Val: 0.0373 (phase 0.0069, coeff 0.0304) | LR: 3.65e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 237/250 | Train: 0.0849 (phase 0.0266, coeff 0.0582, bg 0.0004) | Val: 0.0377 (phase 0.0067, coeff 0.0310) | LR: 3.31e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 238/250 | Train: 0.0831 (phase 0.0263, coeff 0.0568, bg 0.0003) | Val: 0.0375 (phase 0.0067, coeff 0.0308) | LR: 2.99e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 239/250 | Train: 0.0844 (phase 0.0267, coeff 0.0577, bg 0.0004) | Val: 0.0374 (phase 0.0067, coeff 0.0307) | LR: 2.70e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 240/250 | Train: 0.0838 (phase 0.0265, coeff 0.0573, bg 0.0003) | Val: 0.0376 (phase 0.0067, coeff 0.0308) | LR: 2.43e-06 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.987 | even 0.988 | worst Noll 15 = 0.976 | head mean 0.873
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.98 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+==> Epoch 241/250 | Train: 0.0854 (phase 0.0267, coeff 0.0587, bg 0.0004) | Val: 0.0376 (phase 0.0067, coeff 0.0310) | LR: 2.18e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 242/250 | Train: 0.0827 (phase 0.0261, coeff 0.0566, bg 0.0003) | Val: 0.0373 (phase 0.0067, coeff 0.0306) | LR: 1.96e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 243/250 | Train: 0.0842 (phase 0.0266, coeff 0.0576, bg 0.0003) | Val: 0.0374 (phase 0.0067, coeff 0.0308) | LR: 1.75e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 244/250 | Train: 0.0837 (phase 0.0264, coeff 0.0573, bg 0.0003) | Val: 0.0373 (phase 0.0067, coeff 0.0305) | LR: 1.58e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 245/250 | Train: 0.0840 (phase 0.0265, coeff 0.0574, bg 0.0003) | Val: 0.0373 (phase 0.0066, coeff 0.0306) | LR: 1.42e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 246/250 | Train: 0.0836 (phase 0.0262, coeff 0.0574, bg 0.0003) | Val: 0.0373 (phase 0.0067, coeff 0.0306) | LR: 1.30e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 247/250 | Train: 0.0836 (phase 0.0263, coeff 0.0573, bg 0.0003) | Val: 0.0375 (phase 0.0066, coeff 0.0308) | LR: 1.19e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 248/250 | Train: 0.0845 (phase 0.0267, coeff 0.0578, bg 0.0003) | Val: 0.0372 (phase 0.0067, coeff 0.0305) | LR: 1.11e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 249/250 | Train: 0.0837 (phase 0.0264, coeff 0.0573, bg 0.0003) | Val: 0.0372 (phase 0.0067, coeff 0.0305) | LR: 1.05e-06 | time 83s train (49 samples/s) + 6s val
+==> Epoch 250/250 | Train: 0.0838 (phase 0.0263, coeff 0.0574, bg 0.0003) | Val: 0.0372 (phase 0.0067, coeff 0.0305) | LR: 1.01e-06 | time 83s train (49 samples/s) + 6s val
+    Val R2 (projected): odd 0.987 | even 0.988 | worst Noll 15 = 0.976 | head mean 0.873
+    per mode: 4:1.00 5:1.00 6:1.00 7:1.00 8:1.00 9:0.98 10:0.98 11:1.00 12:0.98 13:0.98 14:0.98 15:0.98 16:0.98 17:0.98 18:0.98 19:0.98 20:0.99 21:0.99 22:0.99
+
+Pure FP32 training complete. Best validation loss: 0.037177 -> saved_models/final/m3/best.pth

@@ -1,0 +1,642 @@
+2026-10-08 08:20:39 START evaluate k3_pm1 x1
+Loaded saved_models/k3_pm1/best.pth (mode=hybrid, epoch 130, val_loss 0.1811) on cuda
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x1 nominal (std/peak 1.21e-06); model trained with noise_aug_max=1
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.995    0.996    0.996   0.040    0.661
+   5  (2,-2)   even    0.990    0.992    0.992   0.041    0.467
+   6   (2,2)   even    0.990    0.993    0.993   0.040    0.482
+   7  (3,-1)    odd    0.989    0.993    0.993   0.034    0.406
+   8   (3,1)    odd    0.989    0.992    0.992   0.036    0.403
+   9  (3,-3)    odd   -0.007    0.891    0.891   0.041    0.126
+  10   (3,3)    odd    0.003    0.885    0.885   0.041    0.122
+  11   (4,0)   even    0.993    0.995    0.995   0.036    0.513
+  12   (4,2)   even    0.006    0.927    0.927   0.031    0.114
+  13  (4,-2)   even    0.012    0.922    0.922   0.033    0.118
+  14   (4,4)   even   -0.000    0.947    0.947   0.027    0.116
+  15  (4,-4)   even    0.002    0.930    0.930   0.029    0.111
+  16   (5,1)    odd    0.027    0.952    0.952   0.022    0.102
+  17  (5,-1)    odd    0.058    0.951    0.951   0.023    0.103
+  18   (5,3)    odd    0.002    0.947    0.947   0.024    0.103
+  19  (5,-3)    odd    0.000    0.951    0.951   0.023    0.105
+  20   (5,5)    odd   -0.001    0.971    0.971   0.017    0.102
+  21  (5,-5)    odd   -0.002    0.971    0.971   0.017    0.101
+  22   (6,0)   even    0.942    0.968    0.968   0.024    0.134
+
+Mean R2 (projected): odd 0.950 | even 0.963
+Mean R2 (twin-aware): odd 0.950 | even 0.963
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.144 / 0.147
+  vs twin -phi(-r):    2.214 / 2.160
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.144
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.1421 rad = 0.3053 nm | mean 0.1458 rad = 0.3133 nm
+  Marechal Strehl exp(-sigma^2): median 0.9800 | mean 0.9776 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.106 (ratio 1.005)
+  RMSE of odd part: 0.093
+
+Saved eval/k3_pm1/per_mode_r2.png and eval/k3_pm1/metrics.json
+2026-10-08 08:20:54 START evaluate k3_pm1 x10
+Loaded saved_models/k3_pm1/best.pth (mode=hybrid, epoch 130, val_loss 0.1811) on cuda
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x10 nominal (std/peak 1.21e-05); model trained with noise_aug_max=1
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.853    0.800    0.798   0.296    0.661
+   5  (2,-2)   even   -0.132   -0.158   -0.152   0.503    0.467
+   6   (2,2)   even    0.583    0.600    0.601   0.305    0.482
+   7  (3,-1)    odd    0.630    0.627    0.627   0.248    0.406
+   8   (3,1)    odd   -1.389   -1.164   -1.164   0.593    0.403
+   9  (3,-3)    odd   -0.020    0.750    0.750   0.063    0.126
+  10   (3,3)    odd   -0.129    0.651    0.651   0.072    0.122
+  11   (4,0)   even    0.736    0.720    0.718   0.271    0.513
+  12   (4,2)   even   -0.092    0.576    0.574   0.074    0.114
+  13  (4,-2)   even   -0.011    0.709    0.700   0.063    0.118
+  14   (4,4)   even   -0.016    0.715    0.712   0.062    0.116
+  15  (4,-4)   even   -0.034    0.712    0.707   0.060    0.111
+  16   (5,1)    odd    0.004    0.841    0.841   0.041    0.102
+  17  (5,-1)    odd   -0.017    0.812    0.812   0.044    0.103
+  18   (5,3)    odd   -0.040    0.824    0.824   0.043    0.103
+  19  (5,-3)    odd   -0.031    0.834    0.834   0.043    0.105
+  20   (5,5)    odd   -0.045    0.806    0.806   0.045    0.102
+  21  (5,-5)    odd   -0.038    0.767    0.767   0.049    0.101
+  22   (6,0)   even   -4.962   -3.749   -3.725   0.292    0.134
+
+Mean R2 (projected): odd 0.575 | even 0.103
+Mean R2 (twin-aware): odd 0.575 | even 0.104
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            1.009 / 1.022
+  vs twin -phi(-r):    2.465 / 2.450
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    1.008
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 1.0081 rad = 2.1659 nm | mean 1.0205 rad = 2.1927 nm
+  Marechal Strehl exp(-sigma^2): median 0.3620 | mean 0.3596 | within lambda/14 (0.964 nm): 0.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.4% of samples (0.1% by >10% margin; truth closer by >10%: 99.4%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.378 (ratio 1.288)
+  RMSE of odd part: 0.663
+
+Saved eval/k3_pm1_n10/per_mode_r2.png and eval/k3_pm1_n10/metrics.json
+2026-10-08 08:21:13 START uq_calibration k3_pm1 (mc 30)
+Loaded saved_models/k3_pm1/best.pth (epoch 130, val_loss 0.1811)
+K=3 planes (-1.0, 0.0, 1.0); 1 member(s) x MC dropout T=30
+Variance scale fitted on validation (median |z|): pixel x0.95, coeff x1.11 (unit-RMS fit, reference only: x1.05, x1.61)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.155    0.1643 |  69.6%  94.0%    1.1   -0.45 |          67.4%  92.9%   -0.44
+ val (fit scale)  coeff |  0.033    0.0368 |  60.7%  83.9%    1.6   -1.54 |          64.8%  86.6%   -1.68
+            test  pixel |  0.152    0.1649 |  70.8%  94.6%    1.0   -0.48 |          68.6%  93.6%   -0.47
+            test  coeff |  0.032    0.0370 |  61.1%  84.3%    1.5   -1.63 |          65.0%  87.0%   -1.75
+ OOD coeffs x1.5  pixel |  0.456    0.2387 |  45.4%  74.6%    2.0    1.29 |          43.6%  72.6%    1.44
+ OOD coeffs x1.5  coeff |  0.101    0.0537 |  39.6%  63.4%    3.1    2.22 |          42.8%  66.8%    1.44
+       noise x10  pixel |  1.012    0.3675 |  23.9%  46.7%    2.8    3.85 |          22.8%  44.6%    4.21
+       noise x10  coeff |  0.230    0.0836 |  31.0%  57.0%    2.7    1.34 |          34.1%  61.8%    0.78
+      noise x100  pixel |  2.248    1.1464 |  35.6%  64.8%    2.0    3.00 |          34.0%  62.3%    3.16
+      noise x100  coeff |  0.514    0.2625 |  31.7%  66.1%    2.1    1.05 |          35.8%  71.2%    0.73
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.403 | median sample RMSE 0.141 rad
+              test: rho = 0.449 | median sample RMSE 0.141 rad
+   OOD coeffs x1.5: rho = 0.636 | median sample RMSE 0.373 rad
+         noise x10: rho = 0.376 | median sample RMSE 0.994 rad
+        noise x100: rho = -0.012 | median sample RMSE 2.209 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/k3_pm1/uq_calibration.png and uq_calibration.json
+2026-10-08 08:30:11 START evaluate ens5 x1
+Loaded saved_models/ens/m0/best.pth (mode=hybrid, epoch 99, val_loss 0.1725) on cuda
+Loaded saved_models/ens/m1/best.pth (mode=hybrid, epoch 100, val_loss 0.1713) on cuda
+Loaded saved_models/ens/m2/best.pth (mode=hybrid, epoch 97, val_loss 0.1722) on cuda
+Loaded saved_models/ens/m3/best.pth (mode=hybrid, epoch 98, val_loss 0.1711) on cuda
+Loaded saved_models/ens/m4/best.pth (mode=hybrid, epoch 100, val_loss 0.1730) on cuda
+Evaluating the ensemble of 5 (member-mean prediction)
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x1 nominal (std/peak 1.21e-06); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.998    0.999    0.999   0.025    0.661
+   5  (2,-2)   even    0.995    0.997    0.997   0.026    0.467
+   6   (2,2)   even    0.995    0.997    0.997   0.026    0.482
+   7  (3,-1)    odd    0.995    0.997    0.997   0.023    0.406
+   8   (3,1)    odd    0.995    0.997    0.997   0.022    0.403
+   9  (3,-3)    odd    0.004    0.957    0.957   0.026    0.126
+  10   (3,3)    odd   -0.001    0.950    0.950   0.027    0.122
+  11   (4,0)   even    0.997    0.998    0.998   0.023    0.513
+  12   (4,2)   even    0.012    0.967    0.967   0.021    0.114
+  13  (4,-2)   even    0.015    0.963    0.963   0.023    0.118
+  14   (4,4)   even    0.001    0.970    0.970   0.020    0.116
+  15  (4,-4)   even    0.006    0.969    0.969   0.020    0.111
+  16   (5,1)    odd    0.052    0.978    0.978   0.015    0.102
+  17  (5,-1)    odd    0.053    0.978    0.978   0.015    0.103
+  18   (5,3)    odd    0.005    0.975    0.975   0.016    0.103
+  19  (5,-3)    odd    0.000    0.979    0.979   0.015    0.105
+  20   (5,5)    odd   -0.001    0.987    0.987   0.012    0.102
+  21  (5,-5)    odd   -0.003    0.986    0.986   0.012    0.101
+  22   (6,0)   even    0.970    0.988    0.988   0.015    0.134
+
+Mean R2 (projected): odd 0.978 | even 0.983
+Mean R2 (twin-aware): odd 0.978 | even 0.983
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.090 / 0.094
+  vs twin -phi(-r):    2.215 / 2.156
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.090
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0888 rad = 0.1908 nm | mean 0.0936 rad = 0.2012 nm
+  Marechal Strehl exp(-sigma^2): median 0.9921 | mean 0.9906 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.099 (ratio 1.001)
+  RMSE of odd part: 0.059
+
+Saved eval/ens5/per_mode_r2.png and eval/ens5/metrics.json
+2026-10-08 08:30:48 START evaluate ens5 x10
+Loaded saved_models/ens/m0/best.pth (mode=hybrid, epoch 99, val_loss 0.1725) on cuda
+Loaded saved_models/ens/m1/best.pth (mode=hybrid, epoch 100, val_loss 0.1713) on cuda
+Loaded saved_models/ens/m2/best.pth (mode=hybrid, epoch 97, val_loss 0.1722) on cuda
+Loaded saved_models/ens/m3/best.pth (mode=hybrid, epoch 98, val_loss 0.1711) on cuda
+Loaded saved_models/ens/m4/best.pth (mode=hybrid, epoch 100, val_loss 0.1730) on cuda
+Evaluating the ensemble of 5 (member-mean prediction)
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x10 nominal (std/peak 1.21e-05); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.998    0.998    0.998   0.026    0.661
+   5  (2,-2)   even    0.995    0.997    0.997   0.027    0.467
+   6   (2,2)   even    0.995    0.997    0.997   0.026    0.482
+   7  (3,-1)    odd    0.995    0.997    0.997   0.023    0.406
+   8   (3,1)    odd    0.995    0.997    0.997   0.023    0.403
+   9  (3,-3)    odd    0.004    0.952    0.952   0.027    0.126
+  10   (3,3)    odd   -0.001    0.944    0.944   0.029    0.122
+  11   (4,0)   even    0.997    0.998    0.998   0.023    0.513
+  12   (4,2)   even    0.012    0.962    0.962   0.022    0.114
+  13  (4,-2)   even    0.015    0.958    0.958   0.024    0.118
+  14   (4,4)   even    0.001    0.962    0.962   0.023    0.116
+  15  (4,-4)   even    0.007    0.959    0.959   0.023    0.111
+  16   (5,1)    odd    0.052    0.976    0.976   0.016    0.102
+  17  (5,-1)    odd    0.053    0.976    0.976   0.016    0.103
+  18   (5,3)    odd    0.005    0.971    0.971   0.017    0.103
+  19  (5,-3)    odd    0.000    0.975    0.975   0.017    0.105
+  20   (5,5)    odd   -0.002    0.980    0.980   0.014    0.102
+  21  (5,-5)    odd   -0.003    0.976    0.976   0.016    0.101
+  22   (6,0)   even    0.966    0.986    0.986   0.016    0.134
+
+Mean R2 (projected): odd 0.974 | even 0.980
+Mean R2 (twin-aware): odd 0.974 | even 0.980
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.094 / 0.099
+  vs twin -phi(-r):    2.213 / 2.155
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.094
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0929 rad = 0.1995 nm | mean 0.0986 rad = 0.2119 nm
+  Marechal Strehl exp(-sigma^2): median 0.9914 | mean 0.9896 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.095 (ratio 1.000)
+  RMSE of odd part: 0.062
+
+Saved eval/ens5_n10/per_mode_r2.png and eval/ens5_n10/metrics.json
+2026-10-08 08:31:26 START uq_calibration ens5 (mc 0)
+Loaded saved_models/ens/m0/best.pth (epoch 99, val_loss 0.1725)
+Loaded saved_models/ens/m1/best.pth (epoch 100, val_loss 0.1713)
+Loaded saved_models/ens/m2/best.pth (epoch 97, val_loss 0.1722)
+Loaded saved_models/ens/m3/best.pth (epoch 98, val_loss 0.1711)
+Loaded saved_models/ens/m4/best.pth (epoch 100, val_loss 0.1730)
+K=3 planes (-1.0, 0.0, 1.0); 5 member(s) x deterministic (dropout off)
+Variance scale fitted on validation (median |z|): pixel x1.48, coeff x1.58 (unit-RMS fit, reference only: x1.99, x2.24)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.105    0.0722 |  50.1%  78.2%    2.0    0.08 |          66.3%  89.8%   -0.61
+ val (fit scale)  coeff |  0.023    0.0146 |  47.5%  75.1%    2.2   -1.03 |          65.6%  89.1%   -2.08
+            test  pixel |  0.099    0.0713 |  51.2%  79.2%    1.9   -0.08 |          67.4%  90.6%   -0.68
+            test  coeff |  0.021    0.0144 |  49.6%  76.7%    2.1   -1.26 |          67.8%  90.2%   -2.19
+ OOD coeffs x1.5  pixel |  0.375    0.1344 |  31.7%  56.2%    3.5    4.82 |          44.5%  72.0%    1.87
+ OOD coeffs x1.5  coeff |  0.084    0.0276 |  31.6%  54.1%    3.9    4.58 |          45.7%  71.4%    0.48
+       noise x10  pixel |  0.102    0.0723 |  50.7%  78.8%    1.9   -0.04 |          66.9%  90.5%   -0.66
+       noise x10  coeff |  0.022    0.0146 |  48.0%  76.2%    2.2   -1.11 |          66.8%  89.9%   -2.11
+      noise x100  pixel |  0.251    0.1342 |  43.4%  71.2%    2.4    1.55 |          58.9%  85.0%    0.38
+      noise x100  coeff |  0.056    0.0289 |  40.5%  64.9%    3.2    2.01 |          56.4%  80.7%   -0.53
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.584 | median sample RMSE 0.093 rad
+              test: rho = 0.628 | median sample RMSE 0.089 rad
+   OOD coeffs x1.5: rho = 0.830 | median sample RMSE 0.286 rad
+         noise x10: rho = 0.596 | median sample RMSE 0.092 rad
+        noise x100: rho = 0.454 | median sample RMSE 0.207 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/ens5/uq_calibration.png and uq_calibration.json
+2026-10-08 08:33:22 START evaluate final_m0 x1
+Loaded saved_models/final/m0/best.pth (mode=hybrid, epoch 247, val_loss 0.0371) on cuda
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x1 nominal (std/peak 1.21e-06); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.998    0.999    0.999   0.025    0.661
+   5  (2,-2)   even    0.997    0.997    0.997   0.023    0.467
+   6   (2,2)   even    0.997    0.998    0.998   0.024    0.482
+   7  (3,-1)    odd    0.996    0.997    0.997   0.022    0.406
+   8   (3,1)    odd    0.996    0.997    0.997   0.022    0.403
+   9  (3,-3)    odd    0.961    0.982    0.982   0.017    0.126
+  10   (3,3)    odd    0.954    0.979    0.979   0.018    0.122
+  11   (4,0)   even    0.998    0.998    0.998   0.022    0.513
+  12   (4,2)   even    0.956    0.983    0.983   0.015    0.114
+  13  (4,-2)   even    0.957    0.983    0.983   0.015    0.118
+  14   (4,4)   even    0.954    0.985    0.985   0.014    0.116
+  15  (4,-4)   even    0.944    0.983    0.983   0.014    0.111
+  16   (5,1)    odd    0.956    0.984    0.984   0.013    0.102
+  17  (5,-1)    odd    0.958    0.985    0.985   0.012    0.103
+  18   (5,3)    odd    0.926    0.981    0.981   0.014    0.103
+  19  (5,-3)    odd    0.935    0.984    0.984   0.013    0.105
+  20   (5,5)    odd    0.088    0.993    0.993   0.009    0.102
+  21  (5,-5)    odd    0.061    0.993    0.993   0.008    0.101
+  22   (6,0)   even    0.978    0.989    0.989   0.014    0.134
+
+Mean R2 (projected): odd 0.988 | even 0.990
+Mean R2 (twin-aware): odd 0.988 | even 0.990
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.074 / 0.076
+  vs twin -phi(-r):    2.219 / 2.163
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.074
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0738 rad = 0.1586 nm | mean 0.0760 rad = 0.1633 nm
+  Marechal Strehl exp(-sigma^2): median 0.9946 | mean 0.9939 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.110 (ratio 1.007)
+  RMSE of odd part: 0.048
+
+Saved eval/final_m0/per_mode_r2.png and eval/final_m0/metrics.json
+2026-10-08 08:33:37 START evaluate final_m0 x10
+Loaded saved_models/final/m0/best.pth (mode=hybrid, epoch 247, val_loss 0.0371) on cuda
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x10 nominal (std/peak 1.21e-05); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.998    0.999    0.999   0.025    0.661
+   5  (2,-2)   even    0.997    0.997    0.997   0.024    0.467
+   6   (2,2)   even    0.997    0.997    0.997   0.024    0.482
+   7  (3,-1)    odd    0.996    0.997    0.997   0.022    0.406
+   8   (3,1)    odd    0.996    0.997    0.997   0.023    0.403
+   9  (3,-3)    odd    0.960    0.981    0.981   0.017    0.126
+  10   (3,3)    odd    0.952    0.978    0.978   0.018    0.122
+  11   (4,0)   even    0.998    0.998    0.998   0.022    0.513
+  12   (4,2)   even    0.954    0.981    0.981   0.016    0.114
+  13  (4,-2)   even    0.954    0.981    0.981   0.016    0.118
+  14   (4,4)   even    0.950    0.981    0.981   0.016    0.116
+  15  (4,-4)   even    0.939    0.979    0.979   0.016    0.111
+  16   (5,1)    odd    0.957    0.984    0.984   0.013    0.102
+  17  (5,-1)    odd    0.956    0.984    0.984   0.013    0.103
+  18   (5,3)    odd    0.927    0.980    0.980   0.014    0.103
+  19  (5,-3)    odd    0.935    0.983    0.983   0.014    0.105
+  20   (5,5)    odd    0.086    0.991    0.991   0.010    0.102
+  21  (5,-5)    odd    0.058    0.991    0.991   0.010    0.101
+  22   (6,0)   even    0.977    0.989    0.989   0.014    0.134
+
+Mean R2 (projected): odd 0.986 | even 0.989
+Mean R2 (twin-aware): odd 0.986 | even 0.989
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.076 / 0.079
+  vs twin -phi(-r):    2.219 / 2.163
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.076
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0758 rad = 0.1628 nm | mean 0.0784 rad = 0.1684 nm
+  Marechal Strehl exp(-sigma^2): median 0.9943 | mean 0.9935 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.109 (ratio 1.007)
+  RMSE of odd part: 0.049
+
+Saved eval/final_m0_n10/per_mode_r2.png and eval/final_m0_n10/metrics.json
+2026-10-08 08:33:52 START uq_calibration final_m0 (mc 30)
+Loaded saved_models/final/m0/best.pth (epoch 247, val_loss 0.0371)
+K=3 planes (-1.0, 0.0, 1.0); 1 member(s) x MC dropout T=30
+Variance scale fitted on validation (median |z|): pixel x0.59, coeff x0.60 (unit-RMS fit, reference only: x0.62, x0.72)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.083    0.1413 |  89.9%  99.6%    0.6   -0.95 |          68.1%  94.3%   -1.12
+ val (fit scale)  coeff |  0.018    0.0321 |  87.1%  98.4%    0.7   -2.46 |          67.3%  92.2%   -2.52
+            test  pixel |  0.078    0.1426 |  91.3%  99.8%    0.6   -0.96 |          70.4%  95.4%   -1.17
+            test  coeff |  0.017    0.0324 |  89.5%  99.3%    0.6   -2.51 |          70.0%  94.2%   -2.67
+ OOD coeffs x1.5  pixel |  0.259    0.2107 |  65.7%  90.3%    1.3    0.03 |          44.2%  72.7%    0.96
+ OOD coeffs x1.5  coeff |  0.058    0.0478 |  67.2%  90.0%    1.4   -1.36 |          46.6%  74.7%   -0.19
+       noise x10  pixel |  0.080    0.1410 |  90.4%  99.7%    0.6   -0.96 |          69.4%  94.7%   -1.15
+       noise x10  coeff |  0.018    0.0320 |  87.9%  98.8%    0.7   -2.49 |          67.8%  92.9%   -2.59
+      noise x100  pixel |  0.265    0.1656 |  47.2%  78.4%    1.7    0.37 |          29.2%  54.4%    2.42
+      noise x100  coeff |  0.060    0.0377 |  47.4%  74.6%    2.1   -0.31 |          30.5%  54.8%    3.16
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.416 | median sample RMSE 0.077 rad
+              test: rho = 0.439 | median sample RMSE 0.074 rad
+   OOD coeffs x1.5: rho = 0.710 | median sample RMSE 0.203 rad
+         noise x10: rho = 0.388 | median sample RMSE 0.076 rad
+        noise x100: rho = 0.639 | median sample RMSE 0.238 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/final_m0/uq_calibration.png and uq_calibration.json
+2026-10-08 08:42:52 START evaluate final_ens5 x1
+Loaded saved_models/final/m0/best.pth (mode=hybrid, epoch 247, val_loss 0.0371) on cuda
+Loaded saved_models/final/m1/best.pth (mode=hybrid, epoch 248, val_loss 0.0390) on cuda
+Loaded saved_models/final/m2/best.pth (mode=hybrid, epoch 247, val_loss 0.0386) on cuda
+Loaded saved_models/final/m3/best.pth (mode=hybrid, epoch 250, val_loss 0.0372) on cuda
+Loaded saved_models/final/m4/best.pth (mode=hybrid, epoch 241, val_loss 0.0421) on cuda
+Evaluating the ensemble of 5 (member-mean prediction)
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x1 nominal (std/peak 1.21e-06); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.999    0.999    0.999   0.016    0.661
+   5  (2,-2)   even    0.999    0.999    0.999   0.016    0.467
+   6   (2,2)   even    0.999    0.999    0.999   0.015    0.482
+   7  (3,-1)    odd    0.998    0.999    0.999   0.014    0.406
+   8   (3,1)    odd    0.998    0.999    0.999   0.014    0.403
+   9  (3,-3)    odd    0.970    0.992    0.992   0.012    0.126
+  10   (3,3)    odd    0.966    0.990    0.990   0.012    0.122
+  11   (4,0)   even    0.999    0.999    0.999   0.014    0.513
+  12   (4,2)   even    0.967    0.993    0.993   0.010    0.114
+  13  (4,-2)   even    0.968    0.993    0.993   0.010    0.118
+  14   (4,4)   even    0.961    0.993    0.993   0.010    0.116
+  15  (4,-4)   even    0.914    0.992    0.992   0.010    0.111
+  16   (5,1)    odd    0.967    0.994    0.994   0.008    0.102
+  17  (5,-1)    odd    0.967    0.995    0.995   0.008    0.103
+  18   (5,3)    odd    0.941    0.993    0.993   0.009    0.103
+  19  (5,-3)    odd    0.945    0.993    0.993   0.009    0.105
+  20   (5,5)    odd    0.052    0.996    0.996   0.006    0.102
+  21  (5,-5)    odd    0.072    0.996    0.996   0.006    0.101
+  22   (6,0)   even    0.985    0.996    0.996   0.009    0.134
+
+Mean R2 (projected): odd 0.995 | even 0.996
+Mean R2 (twin-aware): odd 0.995 | even 0.996
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.048 / 0.050
+  vs twin -phi(-r):    2.220 / 2.163
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.048
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0475 rad = 0.1020 nm | mean 0.0495 rad = 0.1065 nm
+  Marechal Strehl exp(-sigma^2): median 0.9978 | mean 0.9974 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.113 (ratio 1.007)
+  RMSE of odd part: 0.030
+
+Saved eval/final_ens5/per_mode_r2.png and eval/final_ens5/metrics.json
+2026-10-08 08:43:30 START evaluate final_ens5 x10
+Loaded saved_models/final/m0/best.pth (mode=hybrid, epoch 247, val_loss 0.0371) on cuda
+Loaded saved_models/final/m1/best.pth (mode=hybrid, epoch 248, val_loss 0.0390) on cuda
+Loaded saved_models/final/m2/best.pth (mode=hybrid, epoch 247, val_loss 0.0386) on cuda
+Loaded saved_models/final/m3/best.pth (mode=hybrid, epoch 250, val_loss 0.0372) on cuda
+Loaded saved_models/final/m4/best.pth (mode=hybrid, epoch 241, val_loss 0.0421) on cuda
+Evaluating the ensemble of 5 (member-mean prediction)
+Config: K=3 planes (-1.0, 0.0, 1.0), pupil_radius=0.0024, crop=128
+Test noise: x10 nominal (std/peak 1.21e-05); model trained with noise_aug_max=30
+Self-check passed: {'twin_vs_coeff_flip_max_abs': 3.552436828613281e-05, 'twin_in_focus_max_rel': 1.382902183877377e-07, 'twin_diversity_stack_max_rel': 0.6016884446144104}
+
+Per-mode coefficient accuracy (projected = LSQ fit of total predicted phase)
+Noll   (n,m) parity  R2 head  R2 proj  R2 twin    RMSE std true
+   4   (2,0)   even    0.999    0.999    0.999   0.016    0.661
+   5  (2,-2)   even    0.999    0.999    0.999   0.016    0.467
+   6   (2,2)   even    0.998    0.999    0.999   0.015    0.482
+   7  (3,-1)    odd    0.998    0.999    0.999   0.014    0.406
+   8   (3,1)    odd    0.998    0.999    0.999   0.014    0.403
+   9  (3,-3)    odd    0.969    0.991    0.991   0.012    0.126
+  10   (3,3)    odd    0.965    0.989    0.989   0.013    0.122
+  11   (4,0)   even    0.999    0.999    0.999   0.014    0.513
+  12   (4,2)   even    0.965    0.991    0.991   0.011    0.114
+  13  (4,-2)   even    0.966    0.991    0.991   0.011    0.118
+  14   (4,4)   even    0.957    0.989    0.989   0.012    0.116
+  15  (4,-4)   even    0.907    0.989    0.989   0.012    0.111
+  16   (5,1)    odd    0.967    0.994    0.994   0.008    0.102
+  17  (5,-1)    odd    0.965    0.994    0.994   0.008    0.103
+  18   (5,3)    odd    0.941    0.992    0.992   0.009    0.103
+  19  (5,-3)    odd    0.945    0.992    0.992   0.009    0.105
+  20   (5,5)    odd    0.051    0.994    0.994   0.008    0.102
+  21  (5,-5)    odd    0.071    0.994    0.994   0.008    0.101
+  22   (6,0)   even    0.984    0.995    0.995   0.009    0.134
+
+Mean R2 (projected): odd 0.994 | even 0.995
+Mean R2 (twin-aware): odd 0.994 | even 0.995
+
+Phase RMSE inside pupil [rad] (median / mean)
+  vs truth:            0.050 / 0.053
+  vs twin -phi(-r):    2.222 / 2.163
+  flat-prediction ref: 1.272 / 1.264  (RMS of true phase)
+  min(truth, twin):    0.050
+
+Residual wavefront error after correction (piston removed), lambda = 13.5 nm
+  RMS: median 0.0502 rad = 0.1078 nm | mean 0.0525 rad = 0.1127 nm
+  Marechal Strehl exp(-sigma^2): median 0.9975 | mean 0.9971 | within lambda/14 (0.964 nm): 100.0%
+  (true aberration before correction: median 1.272 rad = 2.734 nm RMS)
+Twin closer than truth: 0.0% of samples (0.0% by >10% margin; truth closer by >10%: 100.0%)
+
+Even/odd pixelwise split (median)
+  RMS even part: true 1.106 | predicted 1.112 (ratio 1.007)
+  RMSE of odd part: 0.032
+
+Saved eval/final_ens5_n10/per_mode_r2.png and eval/final_ens5_n10/metrics.json
+2026-10-08 08:44:07 START uq_calibration final_ens5 (mc 0)
+Loaded saved_models/final/m0/best.pth (epoch 247, val_loss 0.0371)
+Loaded saved_models/final/m1/best.pth (epoch 248, val_loss 0.0390)
+Loaded saved_models/final/m2/best.pth (epoch 247, val_loss 0.0386)
+Loaded saved_models/final/m3/best.pth (epoch 250, val_loss 0.0372)
+Loaded saved_models/final/m4/best.pth (epoch 241, val_loss 0.0421)
+K=3 planes (-1.0, 0.0, 1.0); 5 member(s) x deterministic (dropout off)
+Variance scale fitted on validation (median |z|): pixel x0.88, coeff x0.88 (unit-RMS fit, reference only: x1.18, x1.22)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.057    0.0681 |  71.5%  92.4%    1.2   -1.28 |          66.1%  89.6%   -1.20
+ val (fit scale)  coeff |  0.013    0.0151 |  71.0%  91.9%    1.2   -2.78 |          65.9%  89.5%   -2.69
+            test  pixel |  0.052    0.0678 |  73.7%  93.7%    1.1   -1.38 |          68.4%  91.2%   -1.32
+            test  coeff |  0.012    0.0151 |  74.3%  93.9%    1.1   -2.92 |          68.9%  91.5%   -2.87
+ OOD coeffs x1.5  pixel |  0.228    0.1263 |  47.1%  73.6%    2.3    1.33 |          42.4%  68.8%    2.03
+ OOD coeffs x1.5  coeff |  0.051    0.0278 |  51.7%  77.1%    2.4   -0.14 |          47.0%  72.9%    0.55
+       noise x10  pixel |  0.054    0.0681 |  73.0%  93.4%    1.1   -1.34 |          67.7%  90.8%   -1.28
+       noise x10  coeff |  0.012    0.0151 |  72.8%  92.7%    1.2   -2.85 |          67.4%  90.0%   -2.78
+      noise x100  pixel |  0.201    0.2142 |  67.2%  90.0%    1.4   -0.04 |          61.8%  86.8%    0.11
+      noise x100  coeff |  0.045    0.0487 |  66.2%  85.8%    1.8   -0.89 |          61.7%  83.1%   -0.56
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.495 | median sample RMSE 0.051 rad
+              test: rho = 0.486 | median sample RMSE 0.048 rad
+   OOD coeffs x1.5: rho = 0.761 | median sample RMSE 0.168 rad
+         noise x10: rho = 0.427 | median sample RMSE 0.050 rad
+        noise x100: rho = 0.642 | median sample RMSE 0.171 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/final_ens5/uq_calibration.png and uq_calibration.json
+2026-10-08 08:46:04 START uq_calibration ens5 x MC6
+Loaded saved_models/ens/m0/best.pth (epoch 99, val_loss 0.1725)
+Loaded saved_models/ens/m1/best.pth (epoch 100, val_loss 0.1713)
+Loaded saved_models/ens/m2/best.pth (epoch 97, val_loss 0.1722)
+Loaded saved_models/ens/m3/best.pth (epoch 98, val_loss 0.1711)
+Loaded saved_models/ens/m4/best.pth (epoch 100, val_loss 0.1730)
+K=3 planes (-1.0, 0.0, 1.0); 5 member(s) x MC dropout T=6
+Variance scale fitted on validation (median |z|): pixel x0.69, coeff x0.85 (unit-RMS fit, reference only: x0.78, x1.24)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.108    0.1491 |  82.9%  98.1%    0.8   -0.79 |          67.5%  92.9%   -0.83
+ val (fit scale)  coeff |  0.023    0.0328 |  70.1%  90.6%    1.2   -2.14 |          64.4%  86.4%   -2.00
+            test  pixel |  0.102    0.1502 |  84.6%  98.7%    0.7   -0.82 |          69.3%  94.0%   -0.90
+            test  coeff |  0.022    0.0331 |  72.8%  92.0%    1.1   -2.29 |          67.1%  88.6%   -2.21
+ OOD coeffs x1.5  pixel |  0.381    0.2364 |  55.0%  83.1%    1.6    0.57 |          40.8%  69.1%    1.51
+ OOD coeffs x1.5  coeff |  0.085    0.0520 |  48.4%  71.8%    2.3    0.26 |          42.1%  66.5%    1.16
+       noise x10  pixel |  0.105    0.1491 |  83.7%  98.6%    0.7   -0.82 |          68.1%  93.6%   -0.88
+       noise x10  coeff |  0.022    0.0328 |  71.2%  90.9%    1.2   -2.21 |          65.0%  87.1%   -2.10
+      noise x100  pixel |  0.252    0.1971 |  62.4%  89.8%    1.3   -0.05 |          46.7%  76.7%    0.42
+      noise x100  coeff |  0.056    0.0437 |  51.5%  73.8%    2.3    0.02 |          46.0%  68.7%    0.90
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.399 | median sample RMSE 0.096 rad
+              test: rho = 0.540 | median sample RMSE 0.092 rad
+   OOD coeffs x1.5: rho = 0.770 | median sample RMSE 0.290 rad
+         noise x10: rho = 0.497 | median sample RMSE 0.095 rad
+        noise x100: rho = 0.435 | median sample RMSE 0.210 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/ens5_mc/uq_calibration.png and uq_calibration.json
+2026-10-08 08:55:03 START uq_calibration final_ens5 x MC6
+Loaded saved_models/final/m0/best.pth (epoch 247, val_loss 0.0371)
+Loaded saved_models/final/m1/best.pth (epoch 248, val_loss 0.0390)
+Loaded saved_models/final/m2/best.pth (epoch 247, val_loss 0.0386)
+Loaded saved_models/final/m3/best.pth (epoch 250, val_loss 0.0372)
+Loaded saved_models/final/m4/best.pth (epoch 241, val_loss 0.0421)
+K=3 planes (-1.0, 0.0, 1.0); 5 member(s) x MC dropout T=6
+Variance scale fitted on validation (median |z|): pixel x0.39, coeff x0.40 (unit-RMS fit, reference only: x0.42, x0.50)
+
+             set  level |   RMSE RMS sigma | cov 1s cov 2s  z RMS     NLL | scaled: cov 1s cov 2s     NLL
+---------------------------------------------------------------------------------------------------------
+ val (fit scale)  pixel |  0.061    0.1528 |  97.8% 100.0%    0.4   -0.98 |          67.6%  93.9%   -1.43
+ val (fit scale)  coeff |  0.013    0.0346 |  95.5%  99.4%    0.5   -2.51 |          67.2%  91.7%   -2.77
+            test  pixel |  0.056    0.1533 |  98.5% 100.0%    0.4   -0.98 |          70.0%  95.1%   -1.50
+            test  coeff |  0.012    0.0347 |  97.5%  99.9%    0.4   -2.55 |          70.4%  94.2%   -2.99
+ OOD coeffs x1.5  pixel |  0.235    0.2368 |  76.1%  94.7%    1.0   -0.16 |          39.0%  66.2%    1.57
+ OOD coeffs x1.5  coeff |  0.053    0.0533 |  78.7%  94.2%    1.1   -1.63 |          43.8%  71.1%    0.44
+       noise x10  pixel |  0.058    0.1519 |  98.3% 100.0%    0.4   -0.99 |          68.9%  94.6%   -1.48
+       noise x10  coeff |  0.013    0.0344 |  96.2%  99.7%    0.5   -2.53 |          67.9%  92.4%   -2.88
+      noise x100  pixel |  0.203    0.2496 |  79.0%  97.3%    0.8   -0.31 |          39.8%  68.4%    0.75
+      noise x100  coeff |  0.046    0.0567 |  76.5%  92.0%    1.2   -1.44 |          42.6%  68.6%    1.67
+
+Per-sample ranking (Spearman: RMS predicted sigma vs actual RMSE; 1 = sigma ranks hard samples perfectly)
+   val (fit scale): rho = 0.445 | median sample RMSE 0.055 rad
+              test: rho = 0.553 | median sample RMSE 0.052 rad
+   OOD coeffs x1.5: rho = 0.767 | median sample RMSE 0.177 rad
+         noise x10: rho = 0.487 | median sample RMSE 0.054 rad
+        noise x100: rho = 0.629 | median sample RMSE 0.170 rad
+Ideal: coverage 68.3% / 95.4%, z RMS 1.0, reliability on y = x.
+Saved eval/final_ens5_mc/uq_calibration.png and uq_calibration.json
+2026-10-08 09:04:02 START benchmark final_ens5
+ensemble of 5 | 256 samples (seed 1234, noise x1) | K=3 | Tesla T4
+
+                    method | median RMSE    [nm] | ms/sample | note
+         network (batched) |      0.0464  0.0998 |     27.75 | batch 64
+      network (per sample) |      0.0464  0.0998 |     33.38 | batch 1, median of 8
+   solver 300 it (batched) |      0.0317  0.0681 |    161.88 | all 256 samples in one batch
+   network -> solver 50 it |      0.0297  0.0638 |     54.97 | network batched + batched refinement
+(solver single-sample latency, 300 it: 0.73 s; RMSE is wrapped mod 2pi and piston-free)
+Saved eval/benchmark/benchmark.json and benchmark.md
+2026-10-08 09:05:12 START benchmark final_m0
+saved_models/final/m0/best.pth | 256 samples (seed 1234, noise x1) | K=3 | Tesla T4
+
+                    method | median RMSE    [nm] | ms/sample | note
+         network (batched) |      0.0740  0.1591 |      5.58 | batch 64
+      network (per sample) |      0.0740  0.1591 |      6.50 | batch 1, median of 8
+   solver 300 it (batched) |      0.0317  0.0681 |    161.95 | all 256 samples in one batch
+   network -> solver 50 it |      0.0296  0.0636 |     32.65 | network batched + batched refinement
+(solver single-sample latency, 300 it: 0.73 s; RMSE is wrapped mod 2pi and piston-free)
+Saved eval/benchmark_final_m0/benchmark.json and benchmark.md
+2026-10-08 09:06:09 START diversity study
+closer to truth / RMSE<0.1 / wrapped truth use the mod-2pi, piston-free RMSE
+96 phases (seed 7), median true RMS 1.29 rad, solver 1000 iters
+
+          layout     d | twin sep | closer to truth RMSE<0.1 med RMSE truth med RMSE twin wrapped truth | crop E p1
+    K=1 in focus  0.00 |    0.000 |           46.9%    19.8%          1.726         1.639         1.264 |    0.9939
+        K=1 (+d)  0.50 |    0.492 |           67.7%    36.5%          0.908         1.545         0.794 |    0.9939
+        K=1 (+d)  0.75 |    0.608 |           87.5%    52.1%          0.599         1.732         0.054 |    0.9939
+        K=1 (+d)  1.00 |    0.667 |           99.0%    62.5%          0.492         1.830         0.051 |    0.9939
+        K=1 (+d)  1.50 |    0.704 |          100.0%    77.1%          0.445         2.092         0.048 |    0.9937
+        K=1 (+d)  2.00 |    0.719 |          100.0%    82.3%          0.548         2.047         0.046 |    0.9935
+     K=2 (0, +d)  0.50 |    0.348 |           84.4%    70.8%          0.316         1.955         0.039 |    0.9939
+     K=2 (0, +d)  0.75 |    0.430 |           94.8%    90.6%          0.347         2.091         0.036 |    0.9938
+     K=2 (0, +d)  1.00 |    0.472 |           99.0%    99.0%          0.293         2.150         0.035 |    0.9938
+     K=2 (0, +d)  1.50 |    0.498 |          100.0%    99.0%          0.333         2.178         0.035 |    0.9936
+     K=2 (0, +d)  2.00 |    0.508 |          100.0%    97.9%          0.407         2.108         0.035 |    0.9935
+ K=3 (-d, 0, +d)  0.50 |    0.401 |           96.9%    94.8%          0.172         2.048         0.034 |    0.9937
+ K=3 (-d, 0, +d)  0.75 |    0.496 |           99.0%    96.9%          0.189         2.085         0.033 |    0.9936
+ K=3 (-d, 0, +d)  1.00 |    0.545 |          100.0%   100.0%          0.173         2.181         0.032 |    0.9935
+ K=3 (-d, 0, +d)  1.50 |    0.575 |          100.0%   100.0%          0.153         2.250         0.030 |    0.9933
+ K=3 (-d, 0, +d)  2.00 |    0.587 |          100.0%   100.0%          0.147         2.248         0.029 |    0.9930
+
+Saved eval/diversity_study.png
+2026-10-08 09:16:22 START solver figure K=1
+Running on: cuda | diversity planes: (0.0,) rad RMS
+Starting optimization...
+Iteration 50/300 | Loss: 0.003904
+Iteration 100/300 | Loss: 0.000769
+Iteration 150/300 | Loss: 0.000730
+Iteration 200/300 | Loss: 0.000736
+Iteration 250/300 | Loss: 0.000743
+Iteration 300/300 | Loss: 0.000749
+RMSE vs truth: 1.551 rad | vs twin -phi(-r): 0.016 rad (piston-free, mod 2pi)
+Saved docs/figures/solver_single_plane.png
+2026-10-08 09:16:29 START solver figure K=3
+Running on: cuda | diversity planes: (-1.0, 0.0, 1.0) rad RMS
+Starting optimization...
+Iteration 50/300 | Loss: 0.000865
+Iteration 100/300 | Loss: 0.000736
+Iteration 150/300 | Loss: 0.000745
+Iteration 200/300 | Loss: 0.000752
+Iteration 250/300 | Loss: 0.000754
+Iteration 300/300 | Loss: 0.000760
+RMSE vs truth: 0.016 rad | vs twin -phi(-r): 1.550 rad (piston-free, mod 2pi)
+Saved docs/figures/solver_diversity.png
+2026-10-08 09:16:34 ALL_DONE
