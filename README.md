@@ -1,88 +1,167 @@
 # EUV Phase Retrieval
 
-Recovering the aberrated pupil phase of an EUV optical system from far-field intensity images, with a differentiable physics simulator, a classical gradient-descent solver, and a physics-informed neural network with calibrated uncertainty.
+**Measuring the hidden wavefront error of an extreme-ultraviolet (EUV) optical system from camera images, using a physics simulator and a neural network.**
 
-**Headline result.** With three phase-diversity images, the network recovers all 19 Zernike modes (Noll 4–22) with R² of 0.89–1.00 and a median pupil-phase error of **0.144 rad RMS** (the true phase has 1.27 rad RMS). A single in-focus image cannot do this at all: the sign of every centrosymmetric mode is fundamentally ambiguous, and the original single-image model learned to predict zero for those modes.
+EUV lithography prints computer chips with 13.5 nm light. At that wavelength, an optical surface that is off by a fraction of a nanometre visibly blurs the image, so the *wavefront*, the shape of the light wave as it leaves the optics, has to be known precisely. A camera, however, only records brightness, not the wave's phase. This project recovers that phase from a few camera images.
 
-| | Single in-focus image (original) | 3 diversity planes (`k3_pm1`) |
+<p align="center"><img src="docs/figures/reconstruction_example.png" width="100%"></p>
+
+### Results at a glance
+
+The final model is an ensemble of 5 networks, evaluated on 1000 unseen test wavefronts. The aberrations it measures have a median of 2.73 nm RMS.
+
+| | Final model |
+|---|---|
+| Median wavefront error | **0.102 nm RMS** (0.048 rad) |
+| Strehl ratio after correction (Maréchal estimate) | **0.998** median; 100 % of samples meet the "diffraction-limited" λ/14 criterion |
+| Recovered Zernike modes | 19 modes (Noll 4–22), each with **R² ≥ 0.990** |
+| With 10× more detector noise | 0.108 nm RMS, Strehl 0.997 |
+| Speed (Tesla T4) | 28 ms per sample for the ensemble, 5.6 ms for a single network |
+
+---
+
+## The problem: one image is not enough
+
+A camera at the focus of the optics records the far-field diffraction pattern, i.e. the squared magnitude of the Fourier transform of the pupil field. The phase is lost in that squaring, and something worse happens too. For a round aperture, a wavefront φ and its **twin**, the same wavefront rotated by 180° with its sign flipped, −φ(−r), produce **exactly the same in-focus image**:
+
+<p align="center"><img src="docs/figures/twin_problem.png" width="92%"></p>
+
+So, from a single in-focus image, nobody can tell positive defocus from negative defocus, or one sign of astigmatism or spherical aberration from the other. The same holds for every "even" Zernike mode. The original model in this repository was trained on single images and did the only thing it could: it predicted **zero** for all of those modes (grey bars below). Its errors formed rings of 1–4 rad, and its uncertainty estimate could not flag the problem.
+
+## The fix: phase diversity
+
+Take two more images with a small, *known* amount of extra defocus (−1 and +1 rad RMS). The twin of φ seen through +1 rad of defocus looks like φ seen through −1 rad. The two stacks of images therefore differ, as the right-hand columns of the figure above show, and the ambiguity is gone. With three images, the network recovers every mode:
+
+<p align="center"><img src="docs/figures/per_mode_before_after.png" width="100%"></p>
+
+How much defocus is needed was decided with a classical physics solver on 96 random wavefronts. With a single in-focus image it lands on the true wavefront only 47 % of the time, which is a coin flip. With three images at (−1, 0, +1) rad it converges to the truth **in 100 % of cases**, with a median error of 0.032 rad.
+
+<details>
+<summary>Diversity study: which defocus values and how many images</summary>
+
+<p align="center"><img src="eval/diversity_study.png" width="100%"></p>
+
+- Two images (0, +1 rad) already reach 99 %.
+- One defocused image is right 99 % of the time, but only 62 % of solves converge.
+- More than 1 rad of defocus adds almost nothing.
+
+The classical solver on the same astigmatism + coma wavefront, with one image (top) and with three (bottom):
+
+<p align="center"><img src="docs/figures/solver_single_plane.png" width="100%"><br><img src="docs/figures/solver_diversity.png" width="100%"></p>
+
+With one image, truth and twin fit the data equally well. Which one the solver lands on is decided by floating-point noise, and here it is the twin (1.55 rad from the truth, 0.016 rad from the twin). With three images it recovers the truth (0.016 rad).
+</details>
+
+---
+
+## Results
+
+### Getting better step by step
+
+<p align="center"><img src="docs/figures/model_progression.png" width="92%"></p>
+
+| Model | R² odd / even modes | Worst mode | Median error, nominal noise | Median error, 10× noise |
+|---|---|---|---|---|
+| Original (1 image) | 0.77 / −0.02 | −0.08 | 2.40 nm | not tested |
+| 3 images (`k3_pm1`) | 0.950 / 0.963 | 0.885 | 0.308 nm | 2.17 nm (breaks down) |
+| + noise augmentation, 5-model ensemble (100 epochs) | 0.978 / 0.983 | 0.950 | 0.192 nm | 0.201 nm |
+| **Final single model** (250 epochs) | 0.988 / 0.990 | 0.979 | 0.159 nm | 0.163 nm |
+| **Final 5-model ensemble** | **0.995 / 0.996** | **0.990** | **0.102 nm** | **0.108 nm** |
+
+What made the difference:
+1. **Three images instead of one** removes the twin ambiguity.
+2. **Training with randomly varied noise levels (1×–30×)** makes the model robust: the 3-image model trained at a single noise level collapses at 10× noise.
+3. **A longer training run with more data:** 5× more samples per network (see [Training](#training-the-final-model)).
+4. **Averaging 5 independently trained networks** cuts the error by a further third.
+
+### Network vs. classical solver
+
+<p align="center"><img src="docs/figures/speed_accuracy.png" width="80%"></p>
+
+| Method | Median error | Time per sample (T4, batched) |
 |---|---|---|
-| Mean R², even-\|m\| modes (defocus, astigmatism, spherical, ...) | −0.02 | **0.963** |
-| Mean R², odd-\|m\| modes (coma, trefoil, ...) | 0.77 | **0.950** |
-| Median phase RMSE in the pupil | 1.12 rad | **0.144 rad** |
-| Predictions closer to the twin −φ(−r) than to the truth | 51.6 % (chance) | **0 %** |
-| MC-dropout coverage of ±1σ / ±2σ (pixels) | σ ≈ 30× too small | **71 % / 95 %** |
+| Network, 1 model | 0.159 nm | 5.6 ms |
+| Network, 5-model ensemble | 0.100 nm | 27.8 ms |
+| Physics solver, 300 iterations | 0.068 nm | 162 ms (0.73 s for a single sample) |
+| **Network → solver, 50 iterations** | **0.064 nm** | **32.7 ms** |
 
-<p align="center"><img src="docs/figures/per_mode_r2_single_plane.png" width="49%"> <img src="docs/figures/per_mode_r2_diversity.png" width="49%"></p>
-<p align="center"><em>Per-mode R² before (left, single in-focus image) and after (right, three diversity planes). Orange: even-|m| modes, whose sign flips under the twin transform.</em></p>
+The iterative physics solver is still the most accurate method on its own, but it is slow. Feeding the network's prediction to the solver as a starting point reaches the solver's accuracy **5× faster**. (Errors in this table are measured modulo 2π and without piston, on 256 test samples.)
 
----
+### Uncertainty: when can the prediction be trusted?
 
-## The physics
+The ensemble also reports an uncertainty σ: the spread of its five predictions. On test data, 74 % of the true phase values fall inside ±1σ and 94 % inside ±2σ, close to the ideal 68 % / 95 %, without any recalibration. The same holds at 10× noise (73 % / 93 %) and even at 100× noise, beyond the training range (67 % / 90 %).
 
-### Forward model
+<p align="center"><img src="docs/figures/uncertainty_coverage.png" width="80%"></p>
 
-The pupil field is a uniformly illuminated circular aperture $P(\mathbf r)$ carrying the aberration phase $\varphi(\mathbf r)$. The detector records the Fraunhofer (far-field) intensity, computed with a centered FFT:
+**Where it falls short:** for aberrations 1.5× larger than anything seen in training, the error grows 4.4× but σ grows only 1.9×, so the intervals become too narrow (47 % / 74 %). σ still ranks which of those predictions are worst (Spearman 0.76), so it works as a warning signal, but its absolute size should not be trusted that far outside the training range. Adding Monte Carlo dropout on top widens the intervals enough out of distribution (76 % / 95 %), but then they are far too wide in distribution (98 % / 100 %). No variant tested was calibrated in both regimes.
 
-$$I_k(\mathbf u) = \left| \mathcal F\left\{ P(\mathbf r)\, e^{\,i[\varphi(\mathbf r) + d_k Z_4(\mathbf r)]} \right\} \right|^2 + n, \qquad k = 1,\dots,K$$
+<details>
+<summary>More: reliability curves and an example with error bars</summary>
 
-where $d_k Z_4$ is a known defocus added to plane $k$ (phase diversity, below) and $n$ is additive Gaussian sensor noise specified relative to the unaberrated peak intensity.
+<p align="center"><img src="eval/final_ens5/uq_calibration.png" width="100%"></p>
+<p align="center"><img src="docs/figures/inference_example.png" width="100%"></p>
 
-**Sampling.** The intensity is the autocorrelation of the pupil field, so its support is twice the pupil diameter $D$. It is free of aliasing on an $N$-pixel grid only if $2D - 1 \le N$, i.e. $Q = N/D \ge 2$. The default geometry (N = 256, 4.8 mm pupil on a 10 mm grid) gives a 123-pixel pupil and Q = 2.08; `OpticsConfig` refuses undersampled geometries. A 128-pixel center crop keeps ≥ 99.2 % of the energy of every diversity plane; the remainder is the hard-edge diffraction tail.
-
-**Aberrations** are expanded in Noll-normalized Zernike polynomials (unit RMS on the unit disk), so coefficients are in RMS radians and the basis is orthonormal to within 0.009 on the pixelated pupil. The training distribution draws large primary aberrations (defocus, astigmatism, coma, spherical; up to 1.15 rad RMS each) and sparse, smaller higher-order modes, for a median peak-to-valley phase of 7.2 rad.
-
-### The twin-image ambiguity
-
-For a real, centrosymmetric pupil, the phase $\varphi(\mathbf r)$ and its **twin** $-\varphi(-\mathbf r)$ produce exactly the same in-focus intensity:
-
-$$\mathcal F\{P\, e^{-i\varphi(-\mathbf r)}\}(\mathbf u) = \overline{\mathcal F\{P\, e^{i\varphi(\mathbf r)}\}(\mathbf u)} \quad\Longrightarrow\quad |\cdot|^2 \text{ identical.}$$
-
-Under $\varphi \to -\varphi(-\mathbf r)$, a Zernike mode with azimuthal order $m$ picks up the factor $-(-1)^m$: **odd-|m| modes are unchanged, every even-|m| mode flips sign** (all of them jointly). A single in-focus image therefore cannot tell positive from negative defocus, astigmatism or spherical aberration. A network trained with MSE on such data does the optimal thing for a two-valued answer, which is to predict the average, zero. That is exactly what the original model did (left figure above), and it left ring-shaped errors of 1–4 rad. MC-dropout uncertainty could not flag this either, because a bimodal answer has no single mode to be uncertain around.
-
-### Breaking it with phase diversity
-
-Adding a known defocus $d Z_4$ (which is even) before propagation changes the picture: the twin of $\varphi + d Z_4$ is $-\varphi(-\mathbf r) - d Z_4$. The image of $\varphi$ at $+d$ equals the image of the twin at $-d$, so a stack of images taken at different, ordered defocus values distinguishes the two. Numerically, φ and its twin give stacks that agree to 10⁻⁷ for a single in-focus plane and differ by roughly 50–100 % (relative L2) as soon as any plane has $d \neq 0$.
-
-The default uses **K = 3 planes at −1, 0, +1 rad RMS** of defocus. The choice comes from a sweep with the classical solver on 96 random phases from the training distribution: with this layout, 100 % of solves converge to the truth (median error 0.040 rad, measured modulo 2π), versus 47 % (chance) for a single in-focus image. Two planes (0, +1) reach 99 %; amplitudes above 1 rad add almost nothing.
-
-<p align="center"><img src="eval/diversity_study.png" width="95%"></p>
-
-<p align="center"><img src="docs/figures/solver_single_plane.png" width="95%"><br><img src="docs/figures/solver_diversity.png" width="95%"></p>
-<p align="center"><em>Classical solver on the same astigmatism + coma wavefront. Top: one in-focus image. Truth and twin fit the data equally well, so which one the solver lands on is a coin flip decided by floating-point noise (47 % truth over 96 random phases); this run lands on the twin (RMSE 1.63 rad vs truth, 0.03 rad vs twin), and the same run on CPU lands on the truth. Bottom: three diversity planes, the truth is recovered every time (0.10 rad here).</em></p>
+This test sample has a coefficient error of 0.020 rad RMS, and 74 % of its coefficients lie within ±2σ. Trefoil (Noll 10) is the largest miss.
+</details>
 
 ---
 
-## The network
+## How it works
 
-- **Input:** the K diversity images, center-cropped to 128×128, log10-compressed, and min-max normalized *jointly* across the planes (per-plane normalization would erase the relative peak heights that encode each plane's defocus blur).
-- **Architecture:** an attention-gated residual U-Net. A modal head predicts Zernike coefficients that a differentiable Zernike generator turns into a baseline phase, and the spatial decoder adds a full-resolution residual (`hybrid` mode). Output: the 256×256 pupil phase.
-- **Loss:** pupil-masked phase MSE + coefficient squared error summed over modes (on the same scale as the phase MSE thanks to the orthonormal basis) + a small penalty on residual phase outside the pupil. Pure FP32.
-- **Training:** synthetic samples generated on the fly; a fixed validation set (seed 12345) selects the best checkpoint. It is drawn from the training distribution, so for noise-augmented runs each validation sample has its own noise level; validation losses of augmented and fixed-noise runs are therefore not directly comparable, and all reported test metrics use fixed noise levels instead. Checkpoints store the full optics config and architecture, so every tool rebuilds the exact model from the file alone.
-- **Reported coefficients** are the least-squares projection of the predicted phase onto the Zernike basis. (The modal head alone only learns the large primary modes; the residual branch carries the rest.)
+**Simulator** (`physics/`). A circular pupil (123 pixels across a 256-pixel grid) carries the wavefront φ, built from 19 Noll-normalized Zernike modes. Each of the three images is the far-field intensity |FFT(pupil · e^{i(φ + d_k Z₄)})|² with diversity defocus d_k ∈ {−1, 0, +1} rad RMS, plus Gaussian detector noise. The grid samples the intensity just above the Nyquist limit (Q = N/D = 2.08 ≥ 2), so it does not alias.
 
-<p align="center"><img src="docs/figures/training_epoch_150.png" width="95%"></p>
-<p align="center"><em>Validation sample at the end of training: input planes, truth, modal baseline, full prediction and absolute error.</em></p>
+**Network** (`ai/`). An 8.3 M-parameter attention U-Net with residual blocks takes the three images (center-cropped to 128×128, log-scaled and normalized together) and outputs the 256×256 phase map. It has two branches. One predicts the 19 Zernike coefficients directly. The other adds a pixel-level correction. Training data is generated on the fly, so the network never sees the same sample twice.
 
-### Uncertainty
+**Solver** (`solver/`). Plain gradient descent on the phase map through the same differentiable simulator. It fits all three images, with a small total-variation penalty inside the pupil.
 
-Uncertainty comes from Monte Carlo dropout (and, optionally, a deep ensemble of independently seeded models). `ai/uq_calibration.py` measures calibration: error vs predicted σ, coverage of ±1σ/±2σ intervals, z-score distribution, NLL and whether σ ranks hard samples, on in-distribution data and on two stress tests. A single variance-scale factor fitted on the validation set corrects residual over-confidence.
+<details>
+<summary>The physics in equations</summary>
 
-For `k3_pm1`, raw MC-dropout σ is already well calibrated per pixel in distribution (coverage 71 % / 95 %, fitted scale 1.02); coefficient σ is 1.6× over-confident, which the fitted scale corrects (78 % / 94 %).
+Detector image for diversity plane k:
 
-<p align="center"><img src="eval/k3_pm1/uq_calibration.png" width="95%"></p>
+$$I_k(\mathbf u) = \left| \mathcal F\left\{ P(\mathbf r)\, e^{\,i[\varphi(\mathbf r) + d_k Z_4(\mathbf r)]} \right\} \right|^2 + n$$
 
-<p align="center"><img src="docs/figures/inference_example.png" width="95%"></p>
-<p align="center"><em>One unseen sample (seed 7): the three input planes, truth, MC-dropout mean, predictive std and projected Zernike coefficients with raw ±2σ bars. Trefoil (Noll 9, 10), the weakest modes, is under-estimated here with bars too tight to cover the truth: the raw coefficient over-confidence that the fitted variance scale corrects.</em></p>
+**Twin ambiguity.** For a real, centrosymmetric pupil $P$:
 
-### Known limitations
+$$\mathcal F\{P\, e^{-i\varphi(-\mathbf r)}\} = \overline{\mathcal F\{P\, e^{i\varphi(\mathbf r)}\}} \;\Rightarrow\; \text{identical } |\cdot|^2.$$
 
-- **Noise level.** `k3_pm1` was trained at a single SNR. At 10× the training noise its error rises to 1.0 rad RMS and the uncertainty under-covers (24 % / 47 %). Noise augmentation (`--noise-aug-max 30`) fixes this. In a short equal-budget test (20 epochs × 1024 samples), median phase RMSE went from 0.335 / 6.8 / 11.0 / 14.5 rad without augmentation to 0.366 / 0.370 / 0.396 / 0.505 rad with it, at 1× / 10× / 30× / 100× the nominal noise. A full-length augmented run has not been evaluated yet.
-- **Out-of-distribution aberrations.** For aberrations 1.5× larger than the training range, the error triples (0.46 rad) while σ grows only 1.4×. Deep ensembles target this epistemic gap.
-- **Simulation only.** Monochromatic Fraunhofer propagation, uniform pupil illumination and Gaussian detector noise; no real detector data yet.
+A Zernike mode of azimuthal order m transforms as $Z \to -(-1)^m Z$ under $\varphi \to -\varphi(-\mathbf r)$. So all even-|m| modes flip sign together, and odd modes are unchanged.
+
+**Diversity.** The twin of $\varphi + dZ_4$ is $-\varphi(-\mathbf r) - dZ_4$ ($Z_4$ is even). The image of φ at +d equals the image of the twin at −d, so an ordered stack of planes at different d separates them.
+
+**Sampling.** The intensity is the autocorrelation of the pupil field, with support 2D − 1 pixels. It fits on the N-pixel grid without aliasing only if 2D − 1 ≤ N, i.e. Q = N/D ≥ 2. `OpticsConfig` refuses geometries that violate this.
+
+**Units.** Wavefront error in nm = phase [rad] × 13.5 nm / 2π. Strehl ≈ exp(−σ²) (Maréchal), with σ the piston-free RMS phase error in rad.
+</details>
+
+### Training the final model
+
+| | |
+|---|---|
+| Ensemble | 5 networks, seeds 0–4, trained one after another (`scripts/train_final.sh`) |
+| Per network | 250 epochs × 4096 samples = 1,024,000 samples; batch 32 |
+| Optimizer | AdamW, learning rate 3·10⁻⁴ with cosine decay to 10⁻⁶; full FP32 precision |
+| Data | 3 planes at (−1, 0, +1) rad; detector noise varied randomly between 1× and 30× the nominal level |
+| Validation | 1024 fixed samples (seed 12345) drawn from the training distribution, so with mixed noise levels. Reported test metrics use fixed noise levels instead. |
+| Hardware and time | one NVIDIA Tesla T4; 30.9 GPU-hours in training epochs (31.0 h wall clock), 5.12 M samples in total |
+| Result | best validation loss 0.0371 / 0.0390 / 0.0386 / 0.0372 / 0.0421, reached at epochs 241–250 |
+
+The training logs are in `logs/final_m*.log`, and all evaluation outputs behind the numbers above are in `eval/`.
 
 ---
 
-## Running it
+## Using it
+
+### Pretrained models
+
+The five final checkpoints are published as `final_models.zip` on the [v1.0 release](https://github.com/EstebanCardenas2001/EUV_phase_retrieval/releases/tag/v1.0) (about 155 MB). Unzip it into `saved_models/final/` and evaluate:
+
+```bash
+python ai/evaluate.py     --checkpoint saved_models/final/m*/best.pth --out-dir eval/my_check
+python ai/inference_uq.py --checkpoint saved_models/final/m*/best.pth --mc-passes 0   # one sample -> uq_monte_carlo.png
+```
+
+### Setup
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -91,61 +170,47 @@ pip install -r requirements.txt
 
 Run everything from the repository root.
 
-**Train** (≈ 2 h for 150 epochs on a Tesla T4). Checkpoints go to `<save-dir>/best.pth` (lowest validation loss) and `final.pth`, with a per-epoch `training_log.json`:
+### Train and evaluate
 
 ```bash
-python ai/train.py --epochs 100 --batch-size 32 --samples-per-epoch 2048 \
-    --noise-aug-max 30 --scheduler cosine \
+# Train one network (the final run used --epochs 250 --samples-per-epoch 4096 --val-samples 1024, seeds 0-4)
+python ai/train.py --epochs 100 --samples-per-epoch 2048 --noise-aug-max 30 --seed 0 \
     --save-dir saved_models/<run> --progress-dir training_progress/<run>
-```
 
-| Flag | Default | Meaning |
-|---|---|---|
-| `--diversity` | `-1.0,0.0,1.0` | defocus per plane [rad RMS]; sets K |
-| `--noise-aug-max` | `1` (off) | per-sample noise multiplier drawn log-uniformly from [1, value] |
-| `--scheduler` | `cosine` | `cosine` or `plateau` (`--plateau-patience`, `--min-lr`) |
-| `--coeff-weight` | `1.0` | weight of the coefficient loss |
-| `--seed` | none | seeds initialization and data (use different seeds for ensemble members) |
-| `--mode` | `hybrid` | `hybrid`, `modal` or `unet` |
-
-**Evaluate** (the optics config is read from the checkpoint):
-
-```bash
-python ai/evaluate.py       --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>   # per-mode R², twin analysis
+# Evaluate (one checkpoint, or several to form an ensemble)
+python ai/evaluate.py       --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>                  # accuracy, nm, Strehl
 python ai/evaluate.py       --checkpoint saved_models/<run>/best.pth --noise-mult 10 --out-dir eval/<run>_n10
-python ai/uq_calibration.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>   # calibration, ~8 min on a T4
-python ai/inference_uq.py   --checkpoint saved_models/<run>/best.pth                        # one sample -> uq_monte_carlo.png
+python ai/uq_calibration.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>                  # uncertainty
+python ai/benchmark_speed.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>_benchmark       # network vs solver
+
+# Physics checks and figures
+python solver/gradient_descent.py   # solver demo: error vs truth and vs twin
+python ai/diversity_study.py        # which diversity defocus to use
+python docs/make_figures.py         # regenerate the README figures from eval/
 ```
 
-**Deep ensemble.** Train members with different seeds, then pass all checkpoints to any tool; predictions are the member mean and the uncertainty is the spread over members × MC-dropout passes (`--mc-passes 0` turns dropout off):
+---
 
-```bash
-for s in 0 1 2 3 4; do
-  python ai/train.py --epochs 100 --noise-aug-max 30 --seed $s \
-      --save-dir saved_models/ens/m$s --progress-dir training_progress/ens/m$s
-done
-python ai/evaluate.py       --checkpoint saved_models/ens/m*/best.pth --out-dir eval/ens
-python ai/uq_calibration.py --checkpoint saved_models/ens/m*/best.pth --mc-passes 0 --out-dir eval/ens
-```
+## Limitations and next steps
 
-**Physics studies and self-checks:**
+**Simulation only.** Everything here is trained and tested on simulated images: monochromatic light, Fraunhofer propagation, a uniformly lit circular pupil, and Gaussian detector noise. No real detector data has been used yet.
 
-```bash
-python solver/gradient_descent.py # classical solver demo (RMSE vs truth and vs twin)
-python ai/diversity_study.py      # diversity layout x defocus sweep -> eval/diversity_study.png
-python ai/crop_energy.py          # energy captured by the intensity crop
-python physics/config.py          # geometry and sampling check
-python physics/zernike.py         # Zernike normalization / orthonormality check
-```
+**Next steps** toward real measurements:
+- **Fine-tune on real data** with a physics-consistency loss, comparing re-simulated images with the measured ones, so no ground-truth wavefront is needed.
+- **Model photon (Poisson) noise** and a realistic photon budget.
+- **Handle uncertainty in the diversity defocus** itself, since real defocus steps are never exact.
+- **Support non-uniform and centrally obscured pupils,** which are common in EUV optics.
+- **Improve uncertainty out of distribution**, e.g. using the mismatch between measured and re-simulated images as a trust score.
 
 ## Repository layout
 
 ```
-physics/   config.py (OpticsConfig, the single source of truth), simulator.py (K-plane forward model,
-           twin transform), zernike.py (Noll-normalized basis), grid.py
-solver/    gradient_descent.py (pixelwise multi-plane solver, wrap-aware error)
-ai/        dataset.py, unet.py, train.py, checkpoint.py, ensemble.py, evaluate.py, uq_calibration.py,
-           inference_uq.py, diversity_study.py, crop_energy.py
-eval/      evaluation outputs (tracked)
-docs/      README figures
+physics/   config.py (OpticsConfig: geometry, modes, noise, diversity), simulator.py, zernike.py, grid.py
+solver/    gradient_descent.py: classical multi-image phase retrieval
+ai/        dataset.py, unet.py, train.py, checkpoint.py, ensemble.py,
+           evaluate.py, uq_calibration.py, inference_uq.py, benchmark_speed.py, diversity_study.py, crop_energy.py
+scripts/   train_final.sh, eval_final.sh: the final training run and its evaluation
+eval/      evaluation outputs (JSON + plots) behind every number in this README
+docs/      make_figures.py and the README figures
+logs/      training and evaluation logs
 ```

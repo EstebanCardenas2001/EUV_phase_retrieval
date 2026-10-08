@@ -22,14 +22,20 @@ python ai/train.py --epochs 3 --samples-per-epoch 128 --save-dir /tmp/smoke --pr
 
 # Evaluation (config is rebuilt from the checkpoint; no geometry flags). Every tool accepts several
 # --checkpoint paths, which form a deep ensemble (member-mean prediction, spread over members x MC passes)
-python ai/evaluate.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>        # per-mode R², twin analysis (--noise-mult N)
+python ai/evaluate.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>        # per-mode R², twin analysis, nm + Strehl (--noise-mult N)
 python ai/uq_calibration.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>  # MC-dropout calibration
 python ai/inference_uq.py --checkpoint saved_models/<run>/best.pth                         # -> uq_monte_carlo.png + coefficient table
+python ai/benchmark_speed.py --checkpoint saved_models/<run>/best.pth --out-dir eval/<run>_benchmark  # network vs solver vs network -> solver (time + error)
+
+# Final release run (v1.0): 5 members x 250 epochs x 4096 samples in saved_models/final/m{0..4}; ~31 h on a T4
+tmux new -d -s final 'bash scripts/train_final.sh'       # skips members whose final.pth exists
+tmux new -d -s final_eval 'bash scripts/eval_final.sh'   # all model families -> eval/{k3_pm1,ens5,final_m0,final_ens5}[_n10|_mc], benchmarks, diversity study
+python docs/make_figures.py                              # README figures in docs/figures/ from eval/ (+ final checkpoints)
 
 # Physics studies and self-checks
 python ai/diversity_study.py      # diversity layout x defocus sweep with the solver -> eval/diversity_study.png
 python ai/crop_energy.py          # energy kept by the intensity crop (worst plane)
-python solver/gradient_descent.py # solver demo, prints RMSE vs truth and vs twin (--diversity, --out)
+python solver/gradient_descent.py # solver demo, piston-free mod-2pi RMSE vs truth and vs twin (--diversity, --out)
 python physics/config.py          # geometry / Q check
 python physics/zernike.py         # Zernike RMS + Gram-matrix orthonormality check
 python ai/unet.py                 # model shape check
@@ -55,4 +61,6 @@ Run scripts from the repo root (output paths are relative to CWD). There is no t
 
 **Checkpoints** (`ai/checkpoint.py`): `{model_state, config (asdict), model_kwargs, epoch, val_loss, format, train_args}`. Always load through `load_model(path)` / `load_models(paths)` (ensembles; members must share one config), which rebuild config + architecture and load strictly; they raise on missing files and legacy bare state_dicts instead of falling back to random weights or default geometry. `ai/ensemble.py` wraps members behind the single-model `forward` interface.
 
-**Metrics conventions.** `ai/evaluate.py` reports R² both for the modal head and for an LSQ projection of the *total* predicted phase onto the basis, plus twin-aware scores. Reported coefficients are always the projection: the modal head only learns the large primary modes (R² ≈ 0 for Noll 9, 10, 12–21) and the residual branch carries the rest. Pixelwise solver errors must be compared modulo 2π and piston (`wrapped_pupil_rmse`), since the solver can settle into 2π-wrapped but physically identical phases.
+**Solver** (`solver/gradient_descent.py`): Adam on the pixel phase through the simulator, amplitude loss with `SQRT_EPS` inside the square roots, plus TV restricted to in-pupil neighbour pairs (`total_variation_loss(img, mask)`). Because that TV is averaged over valid pairs only (18 % of grid pairs), the default `lambda_tv = 0.009` equals the old full-grid 0.05; do not raise it back to 0.05 (5.5x stronger, doubles the error). The solver's piston is arbitrary, so always score it with `wrapped_pupil_rmse` (piston-free, mod 2pi). `init_phase` starts it from a network prediction (the hybrid in `ai/benchmark_speed.py`).
+
+**Metrics conventions.** `ai/evaluate.py` reports R² both for the modal head and for an LSQ projection of the *total* predicted phase onto the basis, plus twin-aware scores, and physical units: `WAVELENGTH_NM = 13.5` is a reporting constant in `evaluate.py` (not in `OpticsConfig`), with the piston-free residual in nm and the Marechal Strehl exp(-sigma^2). Reported coefficients are always the projection: in shorter runs the modal head only learned the large primary modes (R² ≈ 0 for Noll 9, 10, 12–21 in k3_pm1 / ens); the final 250-epoch members reach head R² ≈ 0.87, but the projection is still the reported output. `uq_calibration.py` fits its post-hoc scale by median |z| (robust for small ensembles). Pixelwise solver errors must be compared modulo 2π and piston (`wrapped_pupil_rmse`), since the solver can settle into 2π-wrapped but physically identical phases.
