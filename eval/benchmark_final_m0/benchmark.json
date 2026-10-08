@@ -1,0 +1,47 @@
+{
+ "checkpoint": [
+  "saved_models/final/m0/best.pth"
+ ],
+ "num_samples": 256,
+ "seed": 1234,
+ "noise_mult": 1.0,
+ "solver_iters": 300,
+ "refine_iters": 50,
+ "batch_size": 64,
+ "device": "Tesla T4",
+ "results": {
+  "network (batched)": {
+   "median_wrapped_rmse_rad": 0.07403527200222015,
+   "mean_wrapped_rmse_rad": 0.07503330707550049,
+   "median_wrapped_rmse_nm": 0.15907157957553864,
+   "seconds_total": 1.429165706038475,
+   "ms_per_sample": 5.582678539212793,
+   "note": "batch 64"
+  },
+  "network (per sample)": {
+   "median_wrapped_rmse_rad": 0.07403527200222015,
+   "mean_wrapped_rmse_rad": 0.07503330707550049,
+   "median_wrapped_rmse_nm": 0.15907157957553864,
+   "seconds_total": 0.05948822200298309,
+   "ms_per_sample": 6.498103030025959,
+   "note": "batch 1, median of 8"
+  },
+  "solver 300 it (batched)": {
+   "median_wrapped_rmse_rad": 0.031706999987363815,
+   "mean_wrapped_rmse_rad": 0.07722751796245575,
+   "median_wrapped_rmse_nm": 0.0681253969669342,
+   "seconds_total": 41.45793302997481,
+   "ms_per_sample": 161.9450508983391,
+   "note": "all 256 samples in one batch",
+   "single_sample_seconds": 0.7308253099909052
+  },
+  "network -> solver 50 it": {
+   "median_wrapped_rmse_rad": 0.029584821313619614,
+   "mean_wrapped_rmse_rad": 0.0308711938560009,
+   "median_wrapped_rmse_nm": 0.0635657012462616,
+   "seconds_total": 8.357805003994144,
+   "ms_per_sample": 32.64767579685213,
+   "note": "network batched + batched refinement"
+  }
+ }
+}

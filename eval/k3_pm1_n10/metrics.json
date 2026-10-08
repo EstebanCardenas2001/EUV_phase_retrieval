@@ -173,6 +173,16 @@
   "phase_rmse_truth_median": 1.0086344480514526,
   "phase_rmse_twin_median": 2.4650492668151855,
   "true_phase_rms_median": 1.2723467350006104,
+  "wavelength_nm": 13.5,
+  "phase_rmse_truth_median_nm": 2.1671435832977295,
+  "true_phase_rms_median_nm": 2.7337536811828613,
+  "residual_rmse_rad_median": 1.0080604553222656,
+  "residual_rmse_rad_mean": 1.0205152034759521,
+  "residual_rmse_nm_median": 2.165910243988037,
+  "residual_rmse_nm_mean": 2.1926705837249756,
+  "strehl_marechal_median": 0.3619728684425354,
+  "strehl_marechal_mean": 0.35963431000709534,
+  "fraction_within_marechal_criterion": 0.0,
   "twin_closer_fraction": 0.004,
   "even_rms_ratio_median": 1.2880322933197021
 }

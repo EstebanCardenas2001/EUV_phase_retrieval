@@ -1,5 +1,7 @@
 {
-  "checkpoint": "saved_models/k3_pm1/best.pth",
+  "checkpoint": [
+    "saved_models/k3_pm1/best.pth"
+  ],
   "mode": "hybrid",
   "config": {
     "N": 256,
@@ -34,6 +36,7 @@
       1.0
     ]
   },
+  "noise_mult": 1.0,
   "num_samples": 1000,
   "seed": 1234,
   "self_check": {
@@ -170,6 +173,16 @@
   "phase_rmse_truth_median": 0.14353018999099731,
   "phase_rmse_twin_median": 2.2143635749816895,
   "true_phase_rms_median": 1.2723467350006104,
+  "wavelength_nm": 13.5,
+  "phase_rmse_truth_median_nm": 0.30838778614997864,
+  "true_phase_rms_median_nm": 2.7337536811828613,
+  "residual_rmse_rad_median": 0.14209136366844177,
+  "residual_rmse_rad_mean": 0.14583368599414825,
+  "residual_rmse_nm_median": 0.3052963316440582,
+  "residual_rmse_nm_mean": 0.3133370578289032,
+  "strehl_marechal_median": 0.9800124168395996,
+  "strehl_marechal_mean": 0.9776149988174438,
+  "fraction_within_marechal_criterion": 1.0,
   "twin_closer_fraction": 0.0,
   "even_rms_ratio_median": 1.0045454502105713
 }
