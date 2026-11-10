@@ -6,7 +6,7 @@ EUV lithography prints computer chips with 13.5 nm light. At that wavelength, an
 
 <p align="center"><img src="docs/figures/reconstruction_example.png" width="100%"></p>
 
-### Results at a glance
+### Summary of results
 
 The final model is an ensemble of 5 networks, evaluated on 1000 unseen test wavefronts. The aberrations it measures have a median of 2.73 nm RMS.
 
@@ -17,8 +17,6 @@ The final model is an ensemble of 5 networks, evaluated on 1000 unseen test wave
 | Recovered Zernike modes | 19 modes (Noll 4–22), each with **R² ≥ 0.990** |
 | With 10× more detector noise | 0.108 nm RMS, Strehl 0.997 |
 | Speed (Tesla T4) | 28 ms per sample for the ensemble, 5.6 ms for a single network |
-
----
 
 ## The problem: one image is not enough
 
@@ -51,8 +49,6 @@ The classical solver on the same astigmatism + coma wavefront, with one image (t
 
 With one image, truth and twin fit the data equally well. Which one the solver lands on is decided by floating-point noise, and here it is the twin (1.55 rad from the truth, 0.016 rad from the twin). With three images it recovers the truth (0.016 rad).
 </details>
-
----
 
 ## Results
 
@@ -104,8 +100,6 @@ The ensemble also reports an uncertainty σ: the spread of its five predictions.
 This test sample has a coefficient error of 0.020 rad RMS, and 74 % of its coefficients lie within ±2σ. Trefoil (Noll 10) is the largest miss.
 </details>
 
----
-
 ## How it works
 
 **Simulator** (`physics/`). A circular pupil (123 pixels across a 256-pixel grid) carries the wavefront φ, built from 19 Noll-normalized Zernike modes. Each of the three images is the far-field intensity |FFT(pupil · e^{i(φ + d_k Z₄)})|² with diversity defocus d_k ∈ {−1, 0, +1} rad RMS, plus Gaussian detector noise. The grid samples the intensity just above the Nyquist limit (Q = N/D = 2.08 ≥ 2), so it does not alias.
@@ -148,8 +142,6 @@ A Zernike mode of azimuthal order m transforms as $Z \to -(-1)^m Z$ under $\varp
 
 The training logs are in `logs/final_m*.log`, and all evaluation outputs behind the numbers above are in `eval/`.
 
----
-
 ## Using it
 
 ### Pretrained models
@@ -188,8 +180,6 @@ python solver/gradient_descent.py   # solver demo: error vs truth and vs twin
 python ai/diversity_study.py        # which diversity defocus to use
 python docs/make_figures.py         # regenerate the README figures from eval/
 ```
-
----
 
 ## Limitations and next steps
 
